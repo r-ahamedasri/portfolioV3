@@ -4,6 +4,7 @@ import { profile } from '../data.js'
 import { ease, easeOut, scrollToId } from '../lib.js'
 import RollLink from './RollLink.jsx'
 import Magnetic from './Magnetic.jsx'
+import ThemeToggle from './ThemeToggle.jsx'
 
 const links = [
   ['about', 'About'],
@@ -61,6 +62,7 @@ export default function Nav({ ready }) {
         </nav>
         <div className="nav-right">
           <span className="avail"><i />Available</span>
+          <ThemeToggle />
           <Magnetic strength={0.4}>
             <button id="menu-toggle" type="button" className={`burger${open ? ' is-open' : ''}`} onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label="Menu">
               <span /><span />

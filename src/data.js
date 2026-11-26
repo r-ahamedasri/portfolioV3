@@ -143,11 +143,25 @@ export const projects = [
 
 export const journey = [
   {
-    when: 'Sep 2026',
-    tag: 'Cybersecurity',
-    title: 'Junior Cybersecurity Analyst path',
-    org: 'Cisco Networking Academy',
-    detail: 'Completed the career path and earned verified badges across cybersecurity, networking, endpoint security, network defense and threat management.',
+    when: '2023 — 2024',
+    tag: 'School',
+    title: 'G.C.E. Advanced Level',
+    org: 'Zahira College, Kalmunai',
+    detail: 'Physical Science stream, where the interest in how systems work began.',
+  },
+  {
+    when: 'Feb — Jun 2025',
+    tag: 'Certificate',
+    title: 'Information Technology & English',
+    org: 'BCAS Campus',
+    detail: 'Built a grounding in computing fundamentals and technical communication.',
+  },
+  {
+    when: 'May — Dec 2025',
+    tag: 'Foundation',
+    title: 'Foundation in Computing',
+    org: 'Informatics Institute of Technology',
+    detail: 'The bridge into higher education: programming, computing fundamentals and academic skills.',
   },
   {
     when: 'Jan 2026 — Now',
@@ -164,25 +178,11 @@ export const journey = [
     detail: 'Part of the IEEE Computer Society and the Robotics & Automation Society, keeping close to new research and the people doing it.',
   },
   {
-    when: 'May — Dec 2025',
-    tag: 'Foundation',
-    title: 'Foundation in Computing',
-    org: 'Informatics Institute of Technology',
-    detail: 'The bridge into higher education: programming, computing fundamentals and academic skills.',
-  },
-  {
-    when: 'Feb — Jun 2025',
-    tag: 'Certificate',
-    title: 'Information Technology & English',
-    org: 'BCAS Campus',
-    detail: 'Built a grounding in computing fundamentals and technical communication.',
-  },
-  {
-    when: '2023 — 2024',
-    tag: 'School',
-    title: 'G.C.E. Advanced Level',
-    org: 'Zahira College, Kalmunai',
-    detail: 'Physical Science stream, where the interest in how systems work began.',
+    when: 'Sep 2026',
+    tag: 'Cybersecurity',
+    title: 'Junior Cybersecurity Analyst path',
+    org: 'Cisco Networking Academy',
+    detail: 'Completed the career path and earned verified badges across cybersecurity, networking, endpoint security, network defense and threat management.',
   },
 ]
 
