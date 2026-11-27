@@ -46,11 +46,15 @@ export default function Nav({ ready }) {
         animate={ready ? { y: hidden ? -110 : 0, opacity: 1 } : {}}
         transition={{ duration: 0.8, ease: easeOut }}
       >
-        <a href="#top" className="logo" onClick={go('top')} data-cursor="">
+        <a href="#top" className="logo" onClick={go('top')} data-cursor="" aria-label={`${profile.name}, back to top`}>
           <span className="logo-c">©</span>
-          <span className="logo-wrap">
-            <span className="logo-a">Code by</span>
-            <span className="logo-b">{profile.name}</span>
+          <span className="logo-pill" aria-hidden="true">
+            {profile.name.split(' ').map((w) => (
+              <span className="logo-w" key={w}>
+                {w[0]}
+                <span className="logo-x">{w.slice(1)}</span>
+              </span>
+            ))}
           </span>
         </a>
         <nav className="nav-links" aria-label="Primary">

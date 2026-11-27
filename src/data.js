@@ -28,7 +28,7 @@ export const profile = {
   short: 'Asri',
   role: 'AI & Cybersecurity',
   tagline:
-    'I take systems apart to learn how they fail, then build AI-powered tools that make them harder to break.',
+    'I study how systems fail, building tools to automate security work and make systems more resilient.',
   university: 'University of Westminster · IIT Colombo',
   degree: 'BSc (Hons) Computer Science',
   gradYear: '2028',

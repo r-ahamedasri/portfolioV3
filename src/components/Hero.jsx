@@ -128,8 +128,8 @@ export default function Hero({ ready }) {
 
         <div className="hero-bottom">
           <motion.p className="hero-role" {...fade(0.9)}>
-            Cybersecurity <em>meets</em>
-            <br />artificial intelligence
+            Making security work
+            <br /><em>smarter</em> and faster
           </motion.p>
           <motion.p className="hero-tag" {...fade(1)}>{profile.tagline}</motion.p>
           <motion.div {...fade(1.1)} className="hero-badge">
