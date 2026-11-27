@@ -38,12 +38,13 @@ export const profile = {
   email: 'r.ahamedasri@gmail.com',
   github: 'https://github.com/r-ahamedasri',
   linkedin: 'https://www.linkedin.com/in/ahamedasri',
+  tryhackme: 'https://tryhackme.com/p/r.ahamedasri',
   resume: './AhamedAsri_Resume.pdf',
   portrait,
 }
 
 export const about =
-  "I'm a Computer Science undergraduate at IIT Colombo, reading for a University of Westminster degree, and I work where cybersecurity meets artificial intelligence. I learned security the hands-on way: cracking open hashes, sniffing packets and poking at web apps to see how they break. Now I'm pairing that attacker's mindset with AI, from multi-agent pipelines to models that catch what people miss. I build in Python and Rust, I treat privacy as a default rather than a feature, and I want to help teams ship systems that are smart and secure at the same time."
+  "Computer Science undergraduate at the University of Westminster, studying at IIT Colombo. My interests span cybersecurity, software development and networking, especially how automation and AI can support security operations. Currently building hands-on experience with security tools, threat analysis and network defense, with the goal of making security work faster and systems more resilient."
 
 export const focus = [
   { k: 'Studying', v: 'BSc (Hons) Computer Science, Class of 2028' },
@@ -51,12 +52,6 @@ export const focus = [
   { k: 'Aiming for', v: 'Security engineering with AI at its core' },
 ]
 
-export const stats = [
-  { value: 3, suffix: '', label: 'Security & AI tools shipped' },
-  { value: 8, suffix: '', label: 'Cisco verified badges' },
-  { value: 6, suffix: '', label: 'Certificates earned' },
-  { value: 2028, suffix: '', label: 'Expected graduation' },
-]
 
 export const marqueeA = ['Python', 'Rust', 'PyTorch', 'Burp Suite', 'Wireshark', 'Nmap', 'Google ADK', 'Gemini', 'Linux', 'Metasploit']
 export const marqueeB = ['Threat Detection', 'Multi-Agent AI', 'Ethical Hacking', 'LLM Security', 'Network Defense', 'Applied Cryptography', 'Anomaly Detection', 'OWASP Top 10']
@@ -184,6 +179,13 @@ export const journey = [
     org: 'Cisco Networking Academy',
     detail: 'Completed the career path and earned verified badges across cybersecurity, networking, endpoint security, network defense and threat management.',
   },
+  {
+    when: 'Nov 2026 — Now',
+    tag: 'Hands-on',
+    title: 'TryHackMe Premium',
+    org: 'TryHackMe · r.ahamedasri',
+    detail: 'Went premium to practise offensive and defensive security in guided labs and CTF rooms, turning theory into real attacks, investigations and fixes.',
+  },
 ]
 
 export const certificates = [
@@ -239,4 +241,15 @@ export const badges = [
   { title: 'Networking Devices and Initial Configuration', image: badge04 },
   { title: 'Networking Basics', image: badge02 },
   { title: 'Operating Systems Basics', image: badge03 },
+]
+
+// Stats row in the About section. Projects and certifications count themselves from the lists above.
+// CONFIRM: set ctfRoomsCompleted to your real number of completed CTF rooms (shows a dash until you do).
+const ctfRoomsCompleted = null
+
+export const stats = [
+  { value: projects.length, label: 'Projects' },
+  { value: ctfRoomsCompleted, label: 'CTF rooms completed' },
+  { value: certificates.length + badges.length, label: 'Certifications & badges' },
+  { value: 2028, label: 'Expected graduation' },
 ]

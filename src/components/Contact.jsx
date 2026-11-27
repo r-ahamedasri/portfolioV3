@@ -59,6 +59,7 @@ export default function Contact() {
             <div className="socials">
               <RollLink href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</RollLink>
               <RollLink href={profile.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</RollLink>
+              <RollLink href={profile.tryhackme} target="_blank" rel="noreferrer">TryHackMe ↗</RollLink>
               <RollLink href={profile.resume} target="_blank" rel="noreferrer">Resume ↗</RollLink>
             </div>
           </div>

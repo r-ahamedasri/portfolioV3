@@ -17,13 +17,13 @@ function Counter({ value, decimals = 0, suffix }) {
   const inView = useInView(ref, { once: true, margin: '-10% 0px' })
   const [v, setV] = useState(0)
   useEffect(() => {
-    if (!inView) return
+    if (!inView || value == null) return
     const c = animate(0, value, { duration: 2, ease: [0.16, 1, 0.3, 1], onUpdate: setV })
     return () => c.stop()
   }, [inView, value])
   return (
     <span ref={ref} className="tnum">
-      {v.toFixed(decimals)}
+      {value == null ? '—' : v.toFixed(decimals)}
       {suffix}
     </span>
   )

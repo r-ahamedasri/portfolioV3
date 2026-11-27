@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Lenis from 'lenis'
+import { Analytics } from '@vercel/analytics/react'
 import { useReducedMotion } from './lib.js'
 import Preloader from './components/Preloader.jsx'
 import Cursor from './components/Cursor.jsx'
@@ -57,6 +58,7 @@ export default function App() {
         <Certifications />
         <Contact />
       </main>
+      <Analytics />
     </>
   )
 }

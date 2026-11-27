@@ -105,6 +105,7 @@ export default function Nav({ ready }) {
               <div className="menu-foot">
                 <a href={profile.github} target="_blank" rel="noreferrer">GitHub</a>
                 <a href={profile.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+                <a href={profile.tryhackme} target="_blank" rel="noreferrer">TryHackMe</a>
                 <span>{profile.email}</span>
               </div>
             </div>
