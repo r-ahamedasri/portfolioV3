@@ -36,55 +36,20 @@ const Check = () => (
   <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>
 )
 
-function FeaturedBadge({ b, courses }) {
-  return (
-    <motion.div className="cred-cell cred-feat" onPointerMove={spot} {...reveal(0)}>
-      <span className="cred-scan" aria-hidden="true" />
-      <div className="cred-top">
-        <span className="cred-no tnum">01</span>
-        <span className="cred-tag is-hot"><i />Career path complete</span>
-      </div>
-      <div className="cred-feat-body">
-        <div className="cred-feat-img">
-          <span className="cred-ring" aria-hidden="true" />
-          <img src={b.image} alt="" loading="lazy" decoding="async" draggable="false" />
-        </div>
-        <div className="cred-feat-copy">
-          <h3>{b.title.replace(' Career Path', '')}</h3>
-          <p className="muted">Cisco Networking Academy career path. Seven courses across threat management, network defense, endpoint security and networking, each one verified.</p>
-          <div className="cred-progress" aria-label={`${courses} of ${courses} courses complete`}>
-            <div className="cred-segs">
-              {Array.from({ length: courses }, (_, i) => (
-                <motion.i
-                  key={i}
-                  initial={{ scaleX: 0 }}
-                  whileInView={{ scaleX: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, ease: easeOut, delay: 0.5 + i * 0.09 }}
-                />
-              ))}
-            </div>
-            <span className="tnum">{courses} / {courses} courses</span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-function Badge({ b, i }) {
-  const Tag = b.link ? motion.a : motion.div
+function Badge({ b, i, ghost }) {
+  const Tag = b.link ? 'a' : 'div'
   return (
     <Tag
-      className="cred-cell"
+      className="bcard"
       onPointerMove={spot}
+      aria-hidden={ghost || undefined}
+      tabIndex={ghost && b.link ? -1 : undefined}
       data-cursor={b.link ? 'Verify' : undefined}
       {...(b.link ? { href: b.link, target: '_blank', rel: 'noreferrer' } : {})}
-      {...reveal(i + 1)}
     >
       <span className="cred-scan" aria-hidden="true" />
       <div className="cred-top">
-        <span className="cred-no tnum">{String(i + 2).padStart(2, '0')}</span>
+        <span className="cred-no tnum">{String(i + 1).padStart(2, '0')}</span>
         <span className="cred-tag"><Check />Verified</span>
       </div>
       <div className="cred-img"><img src={b.image} alt="" loading="lazy" decoding="async" draggable="false" /></div>
@@ -96,18 +61,20 @@ function Badge({ b, i }) {
   )
 }
 
-function BadgeGrid() {
-  const [featured, ...rest] = badges
+// Every badge at the same size on an endless, slow-moving belt. Hover pauses it.
+function BadgeBelt() {
   return (
-    <div className="cred">
-      <FeaturedBadge b={featured} courses={rest.length} />
-      {rest.map((b, i) => <Badge key={b.title} b={b} i={i} />)}
-      <motion.div className="cred-cell cred-sum" {...reveal(rest.length + 1)}>
-        <b className="tnum"><Count to={badges.length} /></b>
-        <span className="cred-sum-k">Verified badges</span>
-        <span className="cred-sum-note muted">One issuer, one complete career path.</span>
-      </motion.div>
-    </div>
+    <motion.div className="bbelt" role="list" aria-label="Cisco Networking Academy badges" {...reveal(0)}>
+      <div className="bbelt-track">
+        {[0, 1].map((copy) =>
+          badges.map((b, i) => (
+            <div role={copy ? undefined : 'listitem'} key={`${copy}-${b.title}`}>
+              <Badge b={b} i={i} ghost={copy === 1} />
+            </div>
+          ))
+        )}
+      </div>
+    </motion.div>
   )
 }
 
@@ -266,7 +233,7 @@ export default function Certifications() {
           </FadeUp>
         </div>
 
-        <BadgeGrid />
+        <BadgeBelt />
 
         <div className="certs-sub">
           <span className="eyebrow">Certificates</span>
