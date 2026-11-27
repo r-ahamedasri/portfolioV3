@@ -182,9 +182,9 @@ export const journey = [
   {
     when: 'Nov 2026 — Now',
     tag: 'Hands-on',
-    title: 'TryHackMe Premium',
+    title: 'Started on TryHackMe',
     org: 'TryHackMe · r.ahamedasri',
-    detail: 'Went premium to practise offensive and defensive security in guided labs and CTF rooms, turning theory into real attacks, investigations and fixes.',
+    detail: 'Began a hands-on journey on TryHackMe, gaining practical experience in guided labs and working through CTF rooms to turn theory into real skills.',
   },
 ]
 

@@ -1,45 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useInView, animate } from 'framer-motion'
+import { motion, AnimatePresence, useInView, animate } from 'framer-motion'
 import { certificates, badges } from '../data.js'
 import { Eyebrow, RevealLines, FadeUp } from './Reveal.jsx'
 import { ease, easeOut, useMedia } from '../lib.js'
-
-/* ---------- shared: pointer-driven 3D tilt with holographic glare ---------- */
-function useHolo(strength = 22) {
-  const rx = useMotionValue(0)
-  const ry = useMotionValue(0)
-  const px = useMotionValue(50)
-  const py = useMotionValue(50)
-  const srx = useSpring(rx, { stiffness: 180, damping: 16 })
-  const sry = useSpring(ry, { stiffness: 180, damping: 16 })
-  const glare = useTransform([px, py], ([x, y]) => `${x}% ${y}%`)
-  const hue = useTransform(px, [0, 100], [180, 340])
-  const onPointerMove = (e) => {
-    const r = e.currentTarget.getBoundingClientRect()
-    const x = (e.clientX - r.left) / r.width
-    const y = (e.clientY - r.top) / r.height
-    ry.set((x - 0.5) * strength)
-    rx.set(-(y - 0.5) * strength)
-    px.set(x * 100)
-    py.set(y * 100)
-  }
-  const onPointerLeave = () => { rx.set(0); ry.set(0); px.set(50); py.set(50) }
-  return { srx, sry, glare, hue, handlers: { onPointerMove, onPointerLeave } }
-}
-
-function Holo({ src, size = 'md' }) {
-  const { srx, sry, glare, hue, handlers } = useHolo(size === 'lg' ? 18 : 26)
-  return (
-    <motion.div className={`holo holo-${size}`} style={{ rotateX: srx, rotateY: sry }} {...handlers}>
-      <img src={src} alt="" loading="lazy" decoding="async" draggable="false" />
-      <motion.span
-        className="holo-foil"
-        aria-hidden="true"
-        style={{ '--glare': glare, '--hue': hue, WebkitMaskImage: `url(${src})`, maskImage: `url(${src})` }}
-      />
-    </motion.div>
-  )
-}
 
 /* ---------- counters ---------- */
 function Count({ to }) {
@@ -54,51 +17,97 @@ function Count({ to }) {
   return <span ref={ref} className="tnum">{String(v).padStart(2, '0')}</span>
 }
 
-/* ---------- badges ---------- */
-function FeaturedBadge({ b }) {
+/* ---------- badges: a hairline credential grid ---------- */
+// Each cell tracks the pointer for a soft spotlight, and a scan line passes over it on hover.
+const spot = (e) => {
+  const r = e.currentTarget.getBoundingClientRect()
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
+  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
+}
+
+const reveal = (i) => ({
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: '-8% 0px' },
+  transition: { duration: 0.9, ease: easeOut, delay: 0.06 * i },
+})
+
+const Check = () => (
+  <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>
+)
+
+function FeaturedBadge({ b, courses }) {
   return (
-    <motion.div
-      className="feat"
-      initial={{ opacity: 0, scale: 0.8, rotateY: -40 }}
-      whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
-      viewport={{ once: true, margin: '-10% 0px' }}
-      transition={{ duration: 1.4, ease: easeOut }}
-    >
-      <div className="feat-stage">
-        <svg className="feat-orbit o1" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" /></svg>
-        <svg className="feat-orbit o2" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" /></svg>
-        <span className="feat-glow" aria-hidden="true" />
-        <div className="feat-float"><Holo src={b.image} size="lg" /></div>
+    <motion.div className="cred-cell cred-feat" onPointerMove={spot} {...reveal(0)}>
+      <span className="cred-scan" aria-hidden="true" />
+      <div className="cred-top">
+        <span className="cred-no tnum">01</span>
+        <span className="cred-tag is-hot"><i />Career path complete</span>
       </div>
-      <div className="feat-copy">
-        <span className="feat-kicker"><i />Career path complete</span>
-        <h3>{b.title.replace(' Career Path', '')}</h3>
-        <p className="muted">Cisco Networking Academy. Seven courses across threat management, network defense, endpoint security and networking, verified.</p>
+      <div className="cred-feat-body">
+        <div className="cred-feat-img">
+          <span className="cred-ring" aria-hidden="true" />
+          <img src={b.image} alt="" loading="lazy" decoding="async" draggable="false" />
+        </div>
+        <div className="cred-feat-copy">
+          <h3>{b.title.replace(' Career Path', '')}</h3>
+          <p className="muted">Cisco Networking Academy career path. Seven courses across threat management, network defense, endpoint security and networking, each one verified.</p>
+          <div className="cred-progress" aria-label={`${courses} of ${courses} courses complete`}>
+            <div className="cred-segs">
+              {Array.from({ length: courses }, (_, i) => (
+                <motion.i
+                  key={i}
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, ease: easeOut, delay: 0.5 + i * 0.09 }}
+                />
+              ))}
+            </div>
+            <span className="tnum">{courses} / {courses} courses</span>
+          </div>
+        </div>
       </div>
     </motion.div>
   )
 }
 
-function SmallBadge({ b, i }) {
-  const Tag = b.link ? 'a' : 'div'
+function Badge({ b, i }) {
+  const Tag = b.link ? motion.a : motion.div
   return (
-    <motion.div
-      className="sbadge"
-      initial={{ opacity: 0, rotateY: 100, y: 40 }}
-      whileInView={{ opacity: 1, rotateY: 0, y: 0 }}
-      viewport={{ once: true, margin: '-5% 0px' }}
-      transition={{ duration: 1.1, ease: easeOut, delay: 0.2 + i * 0.08 }}
+    <Tag
+      className="cred-cell"
+      onPointerMove={spot}
+      data-cursor={b.link ? 'Verify' : undefined}
+      {...(b.link ? { href: b.link, target: '_blank', rel: 'noreferrer' } : {})}
+      {...reveal(i + 1)}
     >
-      <Tag
-        className="sbadge-in"
-        style={{ animationDelay: `${-i * 0.9}s` }}
-        {...(b.link ? { href: b.link, target: '_blank', rel: 'noreferrer' } : {})}
-        data-cursor="Verified"
-      >
-        <Holo src={b.image} />
-        <span className="sbadge-title">{b.title}</span>
-      </Tag>
-    </motion.div>
+      <span className="cred-scan" aria-hidden="true" />
+      <div className="cred-top">
+        <span className="cred-no tnum">{String(i + 2).padStart(2, '0')}</span>
+        <span className="cred-tag"><Check />Verified</span>
+      </div>
+      <div className="cred-img"><img src={b.image} alt="" loading="lazy" decoding="async" draggable="false" /></div>
+      <div className="cred-copy">
+        <h4>{b.title}</h4>
+        <span>Cisco Networking Academy</span>
+      </div>
+    </Tag>
+  )
+}
+
+function BadgeGrid() {
+  const [featured, ...rest] = badges
+  return (
+    <div className="cred">
+      <FeaturedBadge b={featured} courses={rest.length} />
+      {rest.map((b, i) => <Badge key={b.title} b={b} i={i} />)}
+      <motion.div className="cred-cell cred-sum" {...reveal(rest.length + 1)}>
+        <b className="tnum"><Count to={badges.length} /></b>
+        <span className="cred-sum-k">Verified badges</span>
+        <span className="cred-sum-note muted">One issuer, one complete career path.</span>
+      </motion.div>
+    </div>
   )
 }
 
@@ -241,7 +250,6 @@ function Lightbox({ cert, onClose }) {
 export default function Certifications() {
   const [open, setOpen] = useState(null)
   const close = useCallback(() => setOpen(null), [])
-  const [featured, ...rest] = badges
   const issuers = new Set([...certificates.map((c) => c.issuer), 'Cisco Networking Academy']).size
 
   return (
@@ -258,13 +266,7 @@ export default function Certifications() {
           </FadeUp>
         </div>
 
-        <div className="badge-panel">
-          <span className="badge-beam" aria-hidden="true" />
-          <FeaturedBadge b={featured} />
-          <div className="badge-grid">
-            {rest.map((b, i) => <SmallBadge key={b.title} b={b} i={i} />)}
-          </div>
-        </div>
+        <BadgeGrid />
 
         <div className="certs-sub">
           <span className="eyebrow">Certificates</span>
