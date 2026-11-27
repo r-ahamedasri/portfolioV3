@@ -156,96 +156,133 @@ function BadgeOrbit() {
   )
 }
 
-/* ---------- certificates: 3D coverflow ---------- */
-function Coverflow({ onOpen }) {
-  const [active, setActive] = useState(0)
-  const narrow = useMedia('(max-width: 700px)')
-  const n = certificates.length
-  const go = useCallback((d) => setActive((a) => Math.max(0, Math.min(n - 1, a + d))), [n])
-  const c = certificates[active]
-  const step = narrow ? 120 : 230
+/* ---------- certificates: a scattered paper stack ---------- */
+// The certificates are dealt out from one neat pile into a loose, overlapping spread.
+// Hovering one lifts it off the table, straightens it and scales it up to full size;
+// clicking opens it in the lightbox. On touch screens a tap opens it straight away.
+const SPREAD = [
+  { x: -0.31, y: 18, r: -8 },
+  { x: -0.18, y: -16, r: 5 },
+  { x: -0.06, y: 14, r: -3 },
+  { x: 0.07, y: -12, r: 6 },
+  { x: 0.19, y: 16, r: -5 },
+  { x: 0.31, y: -8, r: 7 },
+]
+
+function CertStack({ onOpen }) {
+  const stage = useRef(null)
+  const inView = useInView(stage, { once: true, margin: '-15% 0px' })
+  const narrow = useMedia('(max-width: 760px)')
+  const [size, setSize] = useState({ w: 1200, h: 560, card: 380 })
+  const [hover, setHover] = useState(null)
+  const [top, setTop] = useState(null)
+  // Each sheet keeps its own shape, so portrait certificates are never cropped.
+  const [ratios, setRatios] = useState(() => certificates.map(() => 1.414))
+
+  useEffect(() => {
+    let live = true
+    certificates.forEach((cert, i) => {
+      const im = new Image()
+      im.onload = () => {
+        if (!live || !im.naturalWidth) return
+        const r = im.naturalWidth / im.naturalHeight
+        setRatios((prev) => prev.map((v, k) => (k === i ? r : v)))
+      }
+      im.src = cert.image
+    })
+    return () => { live = false }
+  }, [])
+
+  useLayoutEffect(() => {
+    const el = stage.current
+    const measure = () => {
+      const widest = Math.max(0, ...[...el.querySelectorAll('.cstack-card')].map((c) => c.offsetWidth))
+      setSize({ w: el.clientWidth, h: el.clientHeight, card: widest || 380 })
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const spread = narrow ? 0.62 : 1
+  // Landscape sheets are --cw wide; portrait ones are a little taller than a landscape sheet.
+  const widthOf = (r) => (r >= 1 ? 1 : 0.82 * r)
+  const liftOf = (r) => {
+    const cw = size.card * widthOf(r)
+    const ch = cw / r
+    return Math.max(1.15, Math.min(1.9, (size.w * 0.6) / cw, (size.h * 0.95) / ch))
+  }
+  const shown = hover ?? top
+  const c = shown == null ? null : certificates[shown]
 
   return (
-    <div className="flow">
-      <motion.div
-        className="flow-stage"
-        tabIndex={0}
-        role="listbox"
-        aria-label="Certificates"
-        aria-activedescendant={`cert-${active}`}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowRight') { e.preventDefault(); go(1) }
-          if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1) }
-          if (e.key === 'Enter') onOpen(c)
-        }}
-        onPanEnd={(_, info) => {
-          if (info.offset.x < -50) go(1)
-          else if (info.offset.x > 50) go(-1)
-        }}
-      >
+    <div className="cstack">
+      <div className="cstack-stage" ref={stage} onPointerLeave={() => setHover(null)}>
         {certificates.map((cert, i) => {
-          const off = i - active
-          const abs = Math.abs(off)
+          const p = SPREAD[i % SPREAD.length]
+          const on = hover === i
+          const x = p.x * size.w * spread
+          const r = ratios[i]
+          const lift = liftOf(r)
           return (
             <motion.button
               key={cert.title}
-              id={`cert-${i}`}
               type="button"
-              role="option"
-              aria-selected={off === 0}
-              aria-label={`${cert.title}, ${cert.issuer}`}
-              className={`flow-card${off === 0 ? ' is-active' : ''}`}
-              onClick={() => (off === 0 ? onOpen(cert) : setActive(i))}
-              data-cursor={off === 0 ? 'Open' : 'View'}
-              initial={false}
-              animate={{
-                x: off * step,
-                z: -abs * 160,
-                rotateY: Math.max(-55, Math.min(55, -off * 38)),
-                scale: 1 - Math.min(abs, 3) * 0.06,
-                opacity: abs > 3 ? 0 : 1 - abs * 0.18,
-              }}
-              transition={{ type: 'spring', stiffness: 160, damping: 22, mass: 0.9 }}
-              style={{ zIndex: 20 - abs }}
+              className={`cstack-card${on ? ' is-on' : ''}`}
+              aria-label={`Open ${cert.title} certificate`}
+              data-cursor="Open"
+              style={{ zIndex: on ? 50 : top === i ? 30 : 10 + i, '--ar': r, '--k': widthOf(r) }}
+              initial={{ x: 0, y: 40, rotate: 0, scale: 0.9, opacity: 0 }}
+              animate={
+                !inView
+                  ? { x: 0, y: 40, rotate: 0, scale: 0.9, opacity: 0 }
+                  : on
+                    ? { x: x * 0.55, y: -10, rotate: 0, scale: lift, opacity: 1 }
+                    : { x, y: p.y, rotate: p.r, scale: 1, opacity: 1 }
+              }
+              transition={
+                on || hover != null
+                  ? { type: 'spring', stiffness: 170, damping: 22, mass: 0.8 }
+                  : { type: 'spring', stiffness: 90, damping: 18, mass: 1, delay: hover == null && top == null ? 0.25 + i * 0.09 : 0 }
+              }
+              onPointerEnter={(e) => { if (e.pointerType === 'mouse') { setHover(i); setTop(i) } }}
+              onFocus={() => { setHover(i); setTop(i) }}
+              onBlur={() => setHover(null)}
+              onClick={() => onOpen(cert)}
             >
-              <img src={cert.image} alt="" loading="lazy" decoding="async" draggable="false" />
-              <span className="flow-sheen" aria-hidden="true" />
+              <span className="cstack-paper">
+                <img src={cert.image} alt="" loading="lazy" decoding="async" draggable="false" />
+                <span className="cstack-sheen" aria-hidden="true" />
+              </span>
             </motion.button>
           )
         })}
-        <span className="flow-floor" aria-hidden="true" />
-      </motion.div>
-
-      <div className="flow-bar">
-        <button id="cert-prev" type="button" className="flow-arrow" onClick={() => go(-1)} disabled={active === 0} aria-label="Previous certificate">←</button>
-        <div className="flow-info" aria-live="polite">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -12, filter: 'blur(6px)' }}
-              transition={{ duration: 0.45, ease: easeOut }}
-            >
-              <div className="flow-meta">
-                <span className="eyebrow">{c.issuer}</span>
-                <span className="eyebrow tnum">{c.date}</span>
-              </div>
-              <h3>{c.title}</h3>
-              {c.link ? (
-                <a className="cert-link" href={c.link} target="_blank" rel="noreferrer">Verify credential ↗</a>
-              ) : (
-                <button id="cert-view" type="button" className="cert-link" onClick={() => onOpen(c)}>View certificate ↗</button>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-        <button id="cert-next" type="button" className="flow-arrow" onClick={() => go(1)} disabled={active === n - 1} aria-label="Next certificate">→</button>
       </div>
-      <div className="flow-dots" aria-hidden="true">
-        {certificates.map((_, i) => (
-          <button key={i} type="button" tabIndex={-1} className={i === active ? 'is-on' : ''} onClick={() => setActive(i)} />
-        ))}
+
+      <div className="cstack-caption" aria-live="polite">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={c ? c.title : 'hint'}
+            initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -8, filter: 'blur(6px)' }}
+            transition={{ duration: 0.35, ease: easeOut }}
+          >
+            {c ? (
+              <>
+                <span className="eyebrow">{c.issuer} · {c.date}</span>
+                <h3>{c.title}</h3>
+                {c.link && <a className="cert-link" href={c.link} target="_blank" rel="noreferrer">Verify credential ↗</a>}
+              </>
+            ) : (
+              <>
+                <span className="eyebrow">{certificates.length} certificates</span>
+                <h3 className="muted">{narrow ? 'Tap one to read it' : 'Hover the pile to pull one out'}</h3>
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -315,9 +352,9 @@ export default function Certifications() {
 
         <div className="certs-sub">
           <span className="eyebrow">Certificates</span>
-          <span className="eyebrow muted hide-sm">Drag, use the arrows, or click to open</span>
+          <span className="eyebrow muted hide-sm">Hover to lift · click to open</span>
         </div>
-        <Coverflow onOpen={setOpen} />
+        <CertStack onOpen={setOpen} />
       </div>
       <Lightbox cert={open} onClose={close} />
     </section>
