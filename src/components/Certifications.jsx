@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useInView, animate, useMotionValue, useTransform, useAnimationFrame, useMotionValueEvent } from 'framer-motion'
+import { motion, AnimatePresence, useInView, animate, useMotionValue, useTransform, useAnimationFrame, useMotionValueEvent, useSpring, useVelocity } from 'framer-motion'
 import { certificates, badges } from '../data.js'
 import { Eyebrow, RevealLines, FadeUp } from './Reveal.jsx'
 import { ease, easeOut, useMedia, useReducedMotion } from '../lib.js'
@@ -156,134 +156,125 @@ function BadgeOrbit() {
   )
 }
 
-/* ---------- certificates: a scattered paper stack ---------- */
-// The certificates are dealt out from one neat pile into a loose, overlapping spread.
-// Hovering one lifts it off the table, straightens it and scales it up to full size;
-// clicking opens it in the lightbox. On touch screens a tap opens it straight away.
-const SPREAD = [
-  { x: -0.31, y: 18, r: -8 },
-  { x: -0.18, y: -16, r: 5 },
-  { x: -0.06, y: 14, r: -3 },
-  { x: 0.07, y: -12, r: 6 },
-  { x: 0.19, y: 16, r: -5 },
-  { x: 0.31, y: -8, r: 7 },
-]
+/* ---------- certificates: a clean list with a floating preview ---------- */
+// Big type, thin rules. On a mouse, hovering a row brings that certificate up as a print that
+// floats beside the cursor and follows it on a spring, tilting with the motion. Click opens it
+// full size. Touch screens get a small thumbnail on every row instead, and a tap opens it.
+const pad2 = (n) => String(n).padStart(2, '0')
 
-function CertStack({ onOpen }) {
-  const stage = useRef(null)
-  const inView = useInView(stage, { once: true, margin: '-15% 0px' })
-  const narrow = useMedia('(max-width: 760px)')
-  const [size, setSize] = useState({ w: 1200, h: 560, card: 380 })
-  const [hover, setHover] = useState(null)
-  const [top, setTop] = useState(null)
-  // Each sheet keeps its own shape, so portrait certificates are never cropped.
-  const [ratios, setRatios] = useState(() => certificates.map(() => 1.414))
+function CertList({ onOpen }) {
+  const box = useRef(null)
+  const fine = useMedia('(hover: hover) and (pointer: fine)')
+  const [active, setActive] = useState(null)
+  const [side, setSide] = useState(1)
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const x = useSpring(mx, { stiffness: 160, damping: 22, mass: 0.6 })
+  const y = useSpring(my, { stiffness: 160, damping: 22, mass: 0.6 })
+  const vx = useVelocity(x)
+  const rotate = useTransform(vx, [-2400, 0, 2400], [-9, 0, 9], { clamp: true })
 
-  useEffect(() => {
-    let live = true
-    certificates.forEach((cert, i) => {
-      const im = new Image()
-      im.onload = () => {
-        if (!live || !im.naturalWidth) return
-        const r = im.naturalWidth / im.naturalHeight
-        setRatios((prev) => prev.map((v, k) => (k === i ? r : v)))
-      }
-      im.src = cert.image
-    })
-    return () => { live = false }
-  }, [])
-
-  useLayoutEffect(() => {
-    const el = stage.current
-    const measure = () => {
-      const widest = Math.max(0, ...[...el.querySelectorAll('.cstack-card')].map((c) => c.offsetWidth))
-      setSize({ w: el.clientWidth, h: el.clientHeight, card: widest || 380 })
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-
-  const spread = narrow ? 0.62 : 1
-  // Landscape sheets are --cw wide; portrait ones are a little taller than a landscape sheet.
-  const widthOf = (r) => (r >= 1 ? 1 : 0.82 * r)
-  const liftOf = (r) => {
-    const cw = size.card * widthOf(r)
-    const ch = cw / r
-    return Math.max(1.15, Math.min(1.9, (size.w * 0.6) / cw, (size.h * 0.95) / ch))
+  const move = (e) => {
+    const r = box.current.getBoundingClientRect()
+    const px = e.clientX - r.left
+    const s = px > r.width * 0.58 ? -1 : 1
+    if (s !== side) setSide(s)
+    mx.set(px + s * 56)
+    my.set(e.clientY - r.top)
   }
-  const shown = hover ?? top
-  const c = shown == null ? null : certificates[shown]
+  const enter = (e, i) => {
+    if (!fine) return
+    if (active == null) {
+      const r = box.current.getBoundingClientRect()
+      const px = e.clientX - r.left
+      const s = px > r.width * 0.58 ? -1 : 1
+      setSide(s)
+      x.jump(px + s * 56); y.jump(e.clientY - r.top)
+      mx.set(px + s * 56); my.set(e.clientY - r.top)
+    }
+    setActive(i)
+  }
 
   return (
-    <div className="cstack">
-      <div className="cstack-stage" ref={stage} onPointerLeave={() => setHover(null)}>
-        {certificates.map((cert, i) => {
-          const p = SPREAD[i % SPREAD.length]
-          const on = hover === i
-          const x = p.x * size.w * spread
-          const r = ratios[i]
-          const lift = liftOf(r)
-          return (
-            <motion.button
-              key={cert.title}
+    <div
+      className={`clist${active != null ? ' has-active' : ''}`}
+      ref={box}
+      onPointerMove={fine ? move : undefined}
+      onPointerLeave={() => setActive(null)}
+    >
+      <ol className="clist-rows">
+        {certificates.map((cert, i) => (
+          <motion.li
+            key={cert.title}
+            className={`clist-row${active === i ? ' is-on' : ''}`}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+            transition={{ duration: 0.9, ease: easeOut, delay: i * 0.07 }}
+          >
+            <motion.i
+              className="clist-rule"
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+              transition={{ duration: 1.2, ease, delay: i * 0.07 }}
+            />
+            <button
               type="button"
-              className={`cstack-card${on ? ' is-on' : ''}`}
-              aria-label={`Open ${cert.title} certificate`}
+              className="clist-btn"
               data-cursor="Open"
-              style={{ zIndex: on ? 50 : top === i ? 30 : 10 + i, '--ar': r, '--k': widthOf(r) }}
-              initial={{ x: 0, y: 40, rotate: 0, scale: 0.9, opacity: 0 }}
-              animate={
-                !inView
-                  ? { x: 0, y: 40, rotate: 0, scale: 0.9, opacity: 0 }
-                  : on
-                    ? { x: x * 0.55, y: -10, rotate: 0, scale: lift, opacity: 1 }
-                    : { x, y: p.y, rotate: p.r, scale: 1, opacity: 1 }
-              }
-              transition={
-                on || hover != null
-                  ? { type: 'spring', stiffness: 170, damping: 22, mass: 0.8 }
-                  : { type: 'spring', stiffness: 90, damping: 18, mass: 1, delay: hover == null && top == null ? 0.25 + i * 0.09 : 0 }
-              }
-              onPointerEnter={(e) => { if (e.pointerType === 'mouse') { setHover(i); setTop(i) } }}
-              onFocus={() => { setHover(i); setTop(i) }}
-              onBlur={() => setHover(null)}
+              aria-label={`${cert.title}, ${cert.issuer}, ${cert.date}. Open certificate`}
+              onPointerEnter={(e) => enter(e, i)}
+              onFocus={() => setActive(i)}
+              onBlur={() => setActive(null)}
               onClick={() => onOpen(cert)}
             >
-              <span className="cstack-paper">
-                <img src={cert.image} alt="" loading="lazy" decoding="async" draggable="false" />
-                <span className="cstack-sheen" aria-hidden="true" />
-              </span>
-            </motion.button>
-          )
-        })}
-      </div>
+              <span className="clist-n">{pad2(i + 1)}</span>
+              <span className="clist-title"><span>{cert.title}</span></span>
+              <span className="clist-issuer">{cert.issuer}</span>
+              <span className="clist-date">{cert.date}</span>
+              <span className="clist-arrow" aria-hidden="true">↗</span>
+              <span className="clist-thumb" aria-hidden="true"><img src={cert.image} alt="" loading="lazy" decoding="async" /></span>
+            </button>
+          </motion.li>
+        ))}
+        <motion.li
+          className="clist-end"
+          aria-hidden="true"
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease, delay: certificates.length * 0.07 }}
+        />
+      </ol>
 
-      <div className="cstack-caption" aria-live="polite">
-        <AnimatePresence mode="wait">
+      {fine && (
+        <motion.div
+          className={`clist-float${side < 0 ? ' is-left' : ''}`}
+          style={{ x, y, rotate }}
+          aria-hidden="true"
+        >
           <motion.div
-            key={c ? c.title : 'hint'}
-            initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -8, filter: 'blur(6px)' }}
-            transition={{ duration: 0.35, ease: easeOut }}
+            className="clist-float-in"
+            animate={active != null ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
           >
-            {c ? (
-              <>
-                <span className="eyebrow">{c.issuer} · {c.date}</span>
-                <h3>{c.title}</h3>
-                {c.link && <a className="cert-link" href={c.link} target="_blank" rel="noreferrer">Verify credential ↗</a>}
-              </>
-            ) : (
-              <>
-                <span className="eyebrow">{certificates.length} certificates</span>
-                <h3 className="muted">{narrow ? 'Tap one to read it' : 'Hover the pile to pull one out'}</h3>
-              </>
-            )}
+            <AnimatePresence initial={false}>
+              {active != null && (
+                <motion.img
+                  key={active}
+                  src={certificates[active].image}
+                  alt=""
+                  initial={{ opacity: 0, y: 24, scale: 1.04 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -18, scale: 0.98 }}
+                  transition={{ duration: 0.45, ease: easeOut }}
+                />
+              )}
+            </AnimatePresence>
           </motion.div>
-        </AnimatePresence>
-      </div>
+        </motion.div>
+      )}
     </div>
   )
 }
@@ -352,9 +343,9 @@ export default function Certifications() {
 
         <div className="certs-sub">
           <span className="eyebrow">Certificates</span>
-          <span className="eyebrow muted hide-sm">Hover to lift · click to open</span>
+          <span className="eyebrow muted hide-sm">Hover to preview · click to open</span>
         </div>
-        <CertStack onOpen={setOpen} />
+        <CertList onOpen={setOpen} />
       </div>
       <Lightbox cert={open} onClose={close} />
     </section>
