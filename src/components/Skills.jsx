@@ -1,8 +1,9 @@
-import { motion } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { skills } from '../data.js'
 import { brand } from '../skillIcons.js'
 import { Eyebrow, RevealLines } from './Reveal.jsx'
-import { ease, easeOut, useReducedMotion } from '../lib.js'
+import { ease, easeOut, useMedia, useReducedMotion } from '../lib.js'
 
 // Tool name -> brand mark (Simple Icons) or one of the line glyphs below for concepts with no logo.
 const ICON = {
@@ -53,89 +54,107 @@ function tint(name) {
   return b.hex
 }
 
+const pad2 = (n) => String(n).padStart(2, '0')
+
 function spotlight(e) {
   const r = e.currentTarget.getBoundingClientRect()
   e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
   e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
 }
 
-function Radar() {
-  return (
-    <svg className="sk-radar" viewBox="0 0 200 200" aria-hidden="true">
-      <defs>
-        <linearGradient id="sk-sweep" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="var(--ember)" stopOpacity="0" />
-          <stop offset="1" stopColor="var(--ember)" stopOpacity=".55" />
-        </linearGradient>
-      </defs>
-      {[90, 66, 42, 18].map((r) => <circle key={r} cx="100" cy="100" r={r} />)}
-      <path d="M100 10v180M10 100h180" />
-      <g className="sk-radar-arm"><path d="M100 100L190 100A90 90 0 0 0 163.6 36.4Z" fill="url(#sk-sweep)" stroke="none" /></g>
-      <circle className="sk-blip" cx="142" cy="70" r="3.5" />
-      <circle className="sk-blip b2" cx="62" cy="128" r="2.5" />
-    </svg>
-  )
-}
-
-function Pulse() {
-  return (
-    <svg className="sk-pulse" viewBox="0 0 400 80" preserveAspectRatio="none" aria-hidden="true">
-      <path className="sk-pulse-base" d="M0 52 L60 52 L80 46 L100 54 L130 50 L160 52 L190 48 L215 52 L235 14 L252 70 L268 40 L290 52 L330 50 L360 53 L400 51" />
-      <path className="sk-pulse-run" d="M0 52 L60 52 L80 46 L100 54 L130 50 L160 52 L190 48 L215 52 L235 14 L252 70 L268 40 L290 52 L330 50 L360 53 L400 51" />
-    </svg>
-  )
-}
-
+// Seven category tabs on the left; the chosen one fills the wall on the right with its tools,
+// one logo tile each. Switching tabs slides the indicator across and re-deals the tiles.
 export default function Skills() {
   const reduced = useReducedMotion()
+  const narrow = useMedia('(max-width: 900px)')
+  const [cur, setCur] = useState(0)
+  const tabs = useRef(null)
+  const s = skills[cur]
+
+  const pick = (i, e) => {
+    setCur(i)
+    if (narrow && e?.currentTarget) e.currentTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+  }
+  const onKey = (e) => {
+    if (!['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) return
+    e.preventDefault()
+    const next = (cur + (e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : -1) + skills.length) % skills.length
+    setCur(next)
+    tabs.current?.querySelectorAll('[role="tab"]')[next]?.focus()
+  }
+
   return (
     <section className="section skills" id="skills">
       <div className="container">
         <Eyebrow index="What I work with">Skills</Eyebrow>
         <RevealLines className="h-xl" lines={[<>Built to break,</>, <>trained to <em>defend.</em></>]} />
-        <div className="sk-grid">
-          {skills.map((s, i) => (
-            <motion.article
-              key={s.key}
-              className={`sk-tile sk-${s.key}`}
-              onPointerMove={spotlight}
-              initial={reduced ? false : { opacity: 0, y: 60, scale: 0.97 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: true, margin: '0px 0px -12% 0px' }}
-              transition={{ duration: 1, ease, delay: (i % 3) * 0.09 }}
-            >
-              {s.key === 'offense' && <Radar />}
-              {s.key === 'aisec' && <Pulse />}
-              <span className="sk-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
 
-              <header className="sk-head">
-                <span className="sk-kicker">
-                  <span>{String(i + 1).padStart(2, '0')}</span>
-                  <i />
-                  <span>{String(s.items.length).padStart(2, '0')} tools</span>
-                </span>
-                <h3>{s.title}</h3>
-                <p>{s.blurb}</p>
-              </header>
+        <motion.div
+          className="skt"
+          initial={reduced ? false : { opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+          transition={{ duration: 1, ease }}
+        >
+          <div className="skt-tabs" role="tablist" aria-label="Skill areas" aria-orientation={narrow ? 'horizontal' : 'vertical'} ref={tabs} onKeyDown={onKey}>
+            {skills.map((g, i) => (
+              <button
+                key={g.key}
+                type="button"
+                role="tab"
+                id={`skt-tab-${g.key}`}
+                aria-selected={i === cur}
+                aria-controls="skt-panel"
+                tabIndex={i === cur ? 0 : -1}
+                className={`skt-tab${i === cur ? ' is-on' : ''}`}
+                onClick={(e) => pick(i, e)}
+              >
+                {i === cur && <motion.span layoutId="skt-ind" className="skt-ind" transition={{ type: 'spring', stiffness: 380, damping: 34 }} />}
+                <span className="skt-n">{pad2(i + 1)}</span>
+                <span className="skt-name">{g.title}</span>
+                <span className="skt-c">{pad2(g.items.length)}</span>
+              </button>
+            ))}
+          </div>
 
-              <ul className="sk-tools">
-                {s.items.map((it, k) => (
-                  <motion.li
-                    key={it}
-                    style={tint(it) ? { '--c': tint(it) } : undefined}
-                    initial={reduced ? false : { opacity: 0, y: 14 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '0px 0px -8% 0px' }}
-                    transition={{ duration: 0.6, ease: easeOut, delay: 0.35 + (i % 3) * 0.09 + k * 0.045 }}
-                  >
-                    <span className="sk-ico"><Icon name={it} /></span>
-                    <span className="sk-label">{it}</span>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.article>
-          ))}
-        </div>
+          <div className="skt-panel" id="skt-panel" role="tabpanel" aria-labelledby={`skt-tab-${s.key}`} onPointerMove={spotlight}>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={s.key}
+                className="skt-body"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.22 } }}
+              >
+                <header className="skt-head">
+                  <motion.span className="skt-kicker" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: easeOut }}>
+                    {pad2(cur + 1)} / {pad2(skills.length)} · {pad2(s.items.length)} tools
+                  </motion.span>
+                  <motion.h3 initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} transition={{ duration: 0.6, ease: easeOut, delay: 0.04 }}>
+                    {s.title}
+                  </motion.h3>
+                  <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: easeOut, delay: 0.1 }}>
+                    {s.blurb}
+                  </motion.p>
+                </header>
+                <ul className="skt-wall">
+                  {s.items.map((it, k) => (
+                    <motion.li
+                      key={it}
+                      style={tint(it) ? { '--c': tint(it) } : undefined}
+                      initial={reduced ? false : { opacity: 0, y: 26, scale: 0.92, filter: 'blur(6px)' }}
+                      animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                      transition={{ duration: 0.6, ease: easeOut, delay: 0.12 + k * 0.05 }}
+                    >
+                      <span className="skt-ico"><Icon name={it} /></span>
+                      <span className="skt-label">{it}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
     </section>
   )

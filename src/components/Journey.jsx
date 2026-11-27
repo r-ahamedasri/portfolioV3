@@ -4,7 +4,7 @@ import { journey } from '../data.js'
 import { useMedia, easeOut } from '../lib.js'
 import { Eyebrow, RevealLines } from './Reveal.jsx'
 
-const tints = ['67,97,255', '255,106,61', '139,92,246', '45,212,191', '255,106,61', '67,97,255']
+const tints = ['67,97,255', '255,106,61', '139,92,246', '45,212,191', '255,106,61', '67,97,255', '45,212,191']
 
 function Milestone({ j, i }) {
   return (
