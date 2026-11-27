@@ -156,125 +156,140 @@ function BadgeOrbit() {
   )
 }
 
-/* ---------- certificates: a clean list with a floating preview ---------- */
-// Big type, thin rules. On a mouse, hovering a row brings that certificate up as a print that
-// floats beside the cursor and follows it on a spring, tilting with the motion. Click opens it
-// full size. Touch screens get a small thumbnail on every row instead, and a tap opens it.
+/* ---------- certificates: one big showcase with a thumbnail strip ---------- */
+// One certificate is on display at a time, large, with its details beside it. The strip of
+// thumbnails underneath picks which: hover or click one and it wipes into the big spot. While
+// the section is on screen and nobody is pointing at it, it moves on by itself every few seconds.
 const pad2 = (n) => String(n).padStart(2, '0')
+const DWELL = 6 // seconds per certificate when advancing on its own
 
-function CertList({ onOpen }) {
-  const box = useRef(null)
-  const fine = useMedia('(hover: hover) and (pointer: fine)')
-  const [active, setActive] = useState(null)
-  const [side, setSide] = useState(1)
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const x = useSpring(mx, { stiffness: 160, damping: 22, mass: 0.6 })
-  const y = useSpring(my, { stiffness: 160, damping: 22, mass: 0.6 })
-  const vx = useVelocity(x)
-  const rotate = useTransform(vx, [-2400, 0, 2400], [-9, 0, 9], { clamp: true })
+function CertShowcase({ onOpen }) {
+  const root = useRef(null)
+  const inView = useInView(root, { margin: '-20% 0px' })
+  const reduced = useReducedMotion()
+  const [idx, setIdx] = useState(0)
+  const [dir, setDir] = useState(1)
+  const [paused, setPaused] = useState(false)
+  const n = certificates.length
+  const c = certificates[idx]
+  const playing = inView && !paused && !reduced
 
-  const move = (e) => {
-    const r = box.current.getBoundingClientRect()
-    const px = e.clientX - r.left
-    const s = px > r.width * 0.58 ? -1 : 1
-    if (s !== side) setSide(s)
-    mx.set(px + s * 56)
-    my.set(e.clientY - r.top)
-  }
-  const enter = (e, i) => {
-    if (!fine) return
-    if (active == null) {
-      const r = box.current.getBoundingClientRect()
-      const px = e.clientX - r.left
-      const s = px > r.width * 0.58 ? -1 : 1
-      setSide(s)
-      x.jump(px + s * 56); y.jump(e.clientY - r.top)
-      mx.set(px + s * 56); my.set(e.clientY - r.top)
-    }
-    setActive(i)
-  }
+  const go = useCallback((next) => {
+    setIdx((cur) => {
+      const to = ((next % n) + n) % n
+      if (to !== cur) setDir(to > cur || (cur === n - 1 && to === 0) ? 1 : -1)
+      return to
+    })
+  }, [n])
+
+  // On phones the strip scrolls sideways: keep the current thumbnail in view.
+  const strip = useRef(null)
+  useEffect(() => {
+    const el = strip.current
+    if (!el || el.scrollWidth <= el.clientWidth) return
+    const t = el.children[idx]
+    if (t) el.scrollTo({ left: t.offsetLeft - parseFloat(getComputedStyle(el).paddingLeft || 0), behavior: 'smooth' })
+  }, [idx])
+
+  useEffect(() => {
+    if (!playing) return
+    const t = setTimeout(() => go(idx + 1), DWELL * 1000)
+    return () => clearTimeout(t)
+  }, [playing, idx, go])
 
   return (
-    <div
-      className={`clist${active != null ? ' has-active' : ''}`}
-      ref={box}
-      onPointerMove={fine ? move : undefined}
-      onPointerLeave={() => setActive(null)}
-    >
-      <ol className="clist-rows">
-        {certificates.map((cert, i) => (
-          <motion.li
-            key={cert.title}
-            className={`clist-row${active === i ? ' is-on' : ''}`}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-            transition={{ duration: 0.9, ease: easeOut, delay: i * 0.07 }}
-          >
-            <motion.i
-              className="clist-rule"
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, margin: '0px 0px -10% 0px' }}
-              transition={{ duration: 1.2, ease, delay: i * 0.07 }}
+    <div className="show" ref={root}>
+      <div className="show-main" onPointerEnter={() => setPaused(true)} onPointerLeave={() => setPaused(false)}>
+        <button type="button" className="show-stage" data-cursor="Open" aria-label={`Open ${c.title} certificate full size`} onClick={() => onOpen(c)}>
+          <AnimatePresence initial={false}>
+            <motion.img
+              key={`bg-${idx}`}
+              className="show-backdrop"
+              src={c.image}
+              alt=""
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
             />
-            <button
-              type="button"
-              className="clist-btn"
-              data-cursor="Open"
-              aria-label={`${cert.title}, ${cert.issuer}, ${cert.date}. Open certificate`}
-              onPointerEnter={(e) => enter(e, i)}
-              onFocus={() => setActive(i)}
-              onBlur={() => setActive(null)}
-              onClick={() => onOpen(cert)}
+          </AnimatePresence>
+          <AnimatePresence initial={false} custom={dir}>
+            <motion.span
+              key={idx}
+              className="show-doc"
+              custom={dir}
+              variants={{
+                enter: (d) => ({ clipPath: d > 0 ? 'inset(0 0 0 100%)' : 'inset(0 100% 0 0)', scale: 1.06, opacity: 1 }),
+                center: { clipPath: 'inset(0 0% 0 0%)', scale: 1, opacity: 1 },
+                exit: { opacity: 0, scale: 0.97 },
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 1, ease }}
             >
-              <span className="clist-n">{pad2(i + 1)}</span>
-              <span className="clist-title"><span>{cert.title}</span></span>
-              <span className="clist-issuer">{cert.issuer}</span>
-              <span className="clist-date">{cert.date}</span>
-              <span className="clist-arrow" aria-hidden="true">↗</span>
-              <span className="clist-thumb" aria-hidden="true"><img src={cert.image} alt="" loading="lazy" decoding="async" /></span>
-            </button>
-          </motion.li>
-        ))}
-        <motion.li
-          className="clist-end"
-          aria-hidden="true"
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1.2, ease, delay: certificates.length * 0.07 }}
-        />
-      </ol>
+              <img src={c.image} alt="" />
+            </motion.span>
+          </AnimatePresence>
+          <span className="show-zoom">View full size ↗</span>
+        </button>
 
-      {fine && (
-        <motion.div
-          className={`clist-float${side < 0 ? ' is-left' : ''}`}
-          style={{ x, y, rotate }}
-          aria-hidden="true"
-        >
-          <motion.div
-            className="clist-float-in"
-            animate={active != null ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+        <div className="show-info">
+          <div className="show-count">
+            <span className="tnum">{pad2(idx + 1)}</span>
+            <i />
+            <span className="tnum muted">{pad2(n)}</span>
+          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={idx}
+              className="show-text"
+              initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -12, filter: 'blur(8px)', transition: { duration: 0.2 } }}
+              transition={{ duration: 0.45, ease: easeOut }}
+            >
+              <span className="show-issuer">{c.issuer}</span>
+              <h3 className="show-title">{c.title}</h3>
+              <span className="show-date">Issued {c.date}</span>
+              {c.link && <a className="show-link" href={c.link} target="_blank" rel="noreferrer">Verify credential <span aria-hidden="true">↗</span></a>}
+            </motion.div>
+          </AnimatePresence>
+          <div className="show-nav">
+            <button type="button" aria-label="Previous certificate" onClick={() => go(idx - 1)}>←</button>
+            <button type="button" aria-label="Next certificate" onClick={() => go(idx + 1)}>→</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="show-strip" ref={strip} role="tablist" aria-label="Certificates">
+        {certificates.map((cert, i) => (
+          <button
+            key={cert.title}
+            type="button"
+            role="tab"
+            aria-selected={i === idx}
+            aria-label={cert.title}
+            className={`show-thumb${i === idx ? ' is-on' : ''}`}
+            onPointerEnter={(e) => { if (e.pointerType === 'mouse') { setPaused(true); go(i) } }}
+            onPointerLeave={() => setPaused(false)}
+            onClick={() => go(i)}
           >
-            <AnimatePresence initial={false}>
-              {active != null && (
-                <motion.img
-                  key={active}
-                  src={certificates[active].image}
-                  alt=""
-                  initial={{ opacity: 0, y: 24, scale: 1.04 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -18, scale: 0.98 }}
-                  transition={{ duration: 0.45, ease: easeOut }}
+            <span className="show-thumb-img"><img src={cert.image} alt="" loading="lazy" decoding="async" /></span>
+            <span className="show-thumb-t">{cert.issuer}</span>
+            <span className="show-bar">
+              {i === idx && (
+                <motion.i
+                  key={`${idx}-${playing}`}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: playing ? 1 : 0 }}
+                  transition={{ duration: playing ? DWELL : 0.3, ease: 'linear' }}
                 />
               )}
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-      )}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   )
 }
@@ -343,9 +358,9 @@ export default function Certifications() {
 
         <div className="certs-sub">
           <span className="eyebrow">Certificates</span>
-          <span className="eyebrow muted hide-sm">Hover to preview · click to open</span>
+          <span className="eyebrow muted hide-sm">Pick one below · click to enlarge</span>
         </div>
-        <CertList onOpen={setOpen} />
+        <CertShowcase onOpen={setOpen} />
       </div>
       <Lightbox cert={open} onClose={close} />
     </section>
