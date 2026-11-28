@@ -27,7 +27,7 @@ function Milestone({ j, i }) {
 const Head = () => (
   <>
     <Eyebrow index="Education & milestones">Journey</Eyebrow>
-    <RevealLines className="h-xl" lines={[<>The path <em>so far</em></>]} />
+    <RevealLines className="h-xl" lines={[<>Path <em>so far</em></>]} />
   </>
 )
 
