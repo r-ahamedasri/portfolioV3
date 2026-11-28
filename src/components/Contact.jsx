@@ -4,7 +4,25 @@ import { profile } from '../data.js'
 import { useClock, scrollToId } from '../lib.js'
 import { RevealLines, FadeUp } from './Reveal.jsx'
 import Magnetic from './Magnetic.jsx'
-import RollLink from './RollLink.jsx'
+import { brand } from '../skillIcons.js'
+
+// Contact links shown as icon pills: [label, link, icon]. Brand marks from Simple Icons; the résumé gets a plain document icon.
+const socials = [
+  ['GitHub', profile.github, 'github'],
+  ['LinkedIn', profile.linkedin, 'linkedin'],
+  ['WhatsApp', profile.whatsapp, 'whatsapp'],
+  ['TryHackMe', profile.tryhackme, 'tryhackme'],
+  ['Résumé', profile.resume, 'doc'],
+]
+
+function SocIcon({ name }) {
+  if (brand[name]) return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={brand[name].d} fill="currentColor" /></svg>
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h6" />
+    </svg>
+  )
+}
 
 export default function Contact() {
   const ref = useRef(null)
@@ -57,11 +75,12 @@ export default function Contact() {
           <div className="contact-cell">
             <span className="eyebrow">Elsewhere</span>
             <div className="socials">
-              <RollLink href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</RollLink>
-              <RollLink href={profile.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</RollLink>
-              <RollLink href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp ↗</RollLink>
-              <RollLink href={profile.tryhackme} target="_blank" rel="noreferrer">TryHackMe ↗</RollLink>
-              <RollLink href={profile.resume} target="_blank" rel="noreferrer">Résumé ↗</RollLink>
+              {socials.map(([label, href, icon]) => (
+                <a key={label} className="soc-pill" href={href} target="_blank" rel="noreferrer">
+                  <SocIcon name={icon} />
+                  <span>{label}</span>
+                </a>
+              ))}
             </div>
           </div>
           <div className="contact-cell">
