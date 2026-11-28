@@ -46,12 +46,6 @@ export const profile = {
 export const about =
   "Computer Science undergraduate at the University of Westminster, studying at IIT Colombo. My interests span cybersecurity, software development and networking, especially how automation and AI can support security operations. Currently building hands-on experience with security tools, threat analysis and network defense, with the goal of making security work faster and systems more resilient."
 
-export const focus = [
-  { k: 'Studying', v: 'BSc (Hons) Computer Science, Class of 2028' },
-  { k: 'Learning now', v: 'Web app security, network defense, LLM agents' },
-  { k: 'Aiming for', v: 'Security engineering with AI at its core' },
-]
-
 
 export const marqueeA = ['Python', 'Rust', 'PyTorch', 'Burp Suite', 'Wireshark', 'Nmap', 'Google ADK', 'Gemini', 'Linux', 'Metasploit']
 export const marqueeB = ['Threat Detection', 'Multi-Agent AI', 'Ethical Hacking', 'LLM Security', 'Network Defense', 'Applied Cryptography', 'Anomaly Detection', 'OWASP Top 10']
@@ -244,12 +238,12 @@ export const badges = [
 ]
 
 // Stats row in the About section. Projects and certifications count themselves from the lists above.
-// CONFIRM: set ctfRoomsCompleted to your real number of completed CTF rooms (shows a dash until you do).
-const ctfRoomsCompleted = null
+// Completed TryHackMe rooms: update this as the count grows.
+const thmRoomsCompleted = 7
 
 export const stats = [
   { value: projects.length, label: 'Projects' },
-  { value: ctfRoomsCompleted, label: 'CTF rooms completed' },
+  { value: thmRoomsCompleted, label: 'TryHackMe rooms completed' },
   { value: certificates.length + badges.length, label: 'Certifications & badges' },
   { value: 2028, label: 'Expected graduation' },
 ]

@@ -60,7 +60,8 @@ function useNameBlock() {
       const hB = l2.getBoundingClientRect().height / 100 - TUCK
       ;[l1, l2].forEach((l, k) => { [l.style.fontSize, l.style.width, l.style.display] = keep[k] })
       if (!w100 || !hA || !hB) return
-      const budget = Math.max(160, window.innerHeight - others - 4)
+      // A little slack so the bottom row never kisses the screen edge, whatever the font metrics.
+      const budget = Math.max(160, window.innerHeight - others - 16)
       let fa = (h1.clientWidth / w100) * 100 * (window.innerWidth <= 760 ? 0.98 : A_WIDTH)
       let fb = Math.min(fa * B_MAX, (budget - hA * fa) / hB)
       if (fb < fa * B_MIN) {
@@ -71,10 +72,18 @@ function useNameBlock() {
     }
     run()
     document.fonts?.ready.then(run)
+    // Re-fit whenever anything else in the hero changes height too (late font swaps can make the
+    // bottom row taller after the first pass), not just when the name's own box changes.
+    document.fonts?.addEventListener?.('loadingdone', run)
     const ro = new ResizeObserver(run)
     ro.observe(box.current)
+    ;[...(box.current?.parentElement?.children || [])].forEach((k) => { if (k !== box.current) ro.observe(k) })
     window.addEventListener('resize', run)
-    return () => { ro.disconnect(); window.removeEventListener('resize', run) }
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', run)
+      document.fonts?.removeEventListener?.('loadingdone', run)
+    }
   }, [])
 
   return { box, first, second, fit }

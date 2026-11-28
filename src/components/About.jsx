@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useInView, animate, useMotionValue, useSpring } from 'framer-motion'
-import { about, stats, profile, focus } from '../data.js'
+import { about, stats, profile } from '../data.js'
 import { Eyebrow, FadeUp } from './Reveal.jsx'
 
 function Word({ children, range, progress }) {
@@ -80,14 +80,6 @@ export default function About() {
           </p>
           <FadeUp className="about-side" delay={0.1}>
             <Portrait />
-            <dl className="focus">
-              {focus.map((f) => (
-                <div key={f.k}>
-                  <dt className="eyebrow">{f.k}</dt>
-                  <dd>{f.v}</dd>
-                </div>
-              ))}
-            </dl>
           </FadeUp>
         </div>
         <div className="stats">
