@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useInView, animate, useMotionValue, useSpring } from 'framer-motion'
-import { about, stats, profile } from '../data.js'
+import { about, stats, profile, resumeBrief } from '../data.js'
 import { Eyebrow, FadeUp } from './Reveal.jsx'
-import Magnetic from './Magnetic.jsx'
 import RollLink from './RollLink.jsx'
+import ResumeViewer from './ResumeViewer.jsx'
 
 function Word({ children, range, progress }) {
   const opacity = useTransform(progress, range, [0.14, 1])
@@ -31,26 +31,49 @@ function Counter({ value, decimals = 0, suffix }) {
   )
 }
 
-// Résumé download under the portrait: a wide pill with an ember wipe, plus a quiet GitHub link.
+// Résumé card under the portrait: a small sheet of the real first page, the role from the CV,
+// and separate Download / Preview buttons. The thumbnail (public/resume-thumb.webp) has the phone number painted out.
+
 function ResumeCta() {
+  const { role, year } = resumeBrief
+  const [viewing, setViewing] = useState(false)
+  const close = useCallback(() => setViewing(false), [])
+  const preview = (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return // let modifier-clicks open a real tab
+    e.preventDefault()
+    setViewing(true)
+  }
   return (
     <div className="resume-cta">
-      <Magnetic strength={0.18} className="resume-mag">
-        <a id="about-resume" className="resume-btn" href={profile.resume} download data-cursor="PDF">
-          <span className="resume-btn-fill" />
-          <span className="resume-btn-text">
-            <span className="resume-btn-label">Download résumé</span>
-            <span className="resume-btn-meta">PDF · 1 page</span>
-          </span>
-          <span className="resume-btn-icon" aria-hidden="true">
-            <span>↓</span>
-            <span>↓</span>
-          </span>
-        </a>
-      </Magnetic>
+      <div className="rb" id="about-resume">
+        <div className="rb-head">
+          <a className="rb-sheet" href={profile.resume} target="_blank" rel="noreferrer" onClick={preview} aria-label="Preview résumé" data-cursor="View">
+            <img src="./resume-thumb.webp" alt="" width="320" height="453" loading="lazy" decoding="async" />
+            <span className="rb-scan" aria-hidden="true" />
+          </a>
+          <div className="rb-id">
+            <span className="rb-kicker"><i aria-hidden="true" />PDF · {year}</span>
+            <span className="rb-title">Résumé</span>
+            <span className="rb-role">{role}</span>
+          </div>
+        </div>
+        <div className="rb-actions">
+          <a className="rb-btn rb-btn--primary" href={profile.resume} download data-cursor="PDF">
+            <span className="rb-btn-label">
+              <span>Download résumé</span>
+              <span aria-hidden="true">Download résumé</span>
+            </span>
+            <span className="rb-btn-icon" aria-hidden="true"><span>↓</span><span>↓</span></span>
+          </a>
+          <a className="rb-btn rb-btn--ghost" href={profile.resume} target="_blank" rel="noreferrer" onClick={preview} aria-haspopup="dialog">
+            Preview <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
       <div className="resume-sub">
         <RollLink href={profile.github} target="_blank" rel="noreferrer">View on GitHub ↗</RollLink>
       </div>
+      <ResumeViewer open={viewing} onClose={close} src={profile.resume} title={`${profile.name} · Résumé`} />
     </div>
   )
 }
@@ -88,8 +111,53 @@ function Portrait() {
   )
 }
 
+// Sizes the About paragraph so it ends level with the photo column (photo + résumé card), leaving no dead
+// space above the stats. Only on two-column layouts; the size stays within a readable range.
+function useFitToSide(textRef, sideRef) {
+  useLayoutEffect(() => {
+    const text = textRef.current
+    const side = sideRef.current
+    if (!text || !side) return
+    const mq = window.matchMedia('(min-width: 901px)')
+    let raf = 0
+    const fit = () => {
+      text.style.lineHeight = ''
+      if (!mq.matches) { text.style.fontSize = ''; return }
+      const target = side.offsetHeight
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16
+      let lo = 2.2 * rem
+      let hi = 3.8 * rem
+      for (let i = 0; i < 12; i++) {
+        const mid = (lo + hi) / 2
+        text.style.fontSize = `${mid}px`
+        if (text.offsetHeight > target) hi = mid
+        else lo = mid
+      }
+      const size = lo - 0.05 // stay just under the wrap point
+      text.style.fontSize = `${size}px`
+      // Ease the leftover (less than one line) into the line spacing so both columns end level.
+      const lh = parseFloat(getComputedStyle(text).lineHeight)
+      const lines = Math.round(text.offsetHeight / lh)
+      if (lines > 0) {
+        const want = target / lines
+        text.style.lineHeight = `${Math.min(Math.max(want, size * 1.1), size * 1.3)}px`
+      }
+    }
+    const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(fit) }
+    const ro = new ResizeObserver(schedule)
+    ro.observe(side)
+    ro.observe(text.parentElement)
+    mq.addEventListener('change', schedule)
+    document.fonts?.ready.then(schedule)
+    fit()
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); mq.removeEventListener('change', schedule) }
+  }, [textRef, sideRef])
+}
+
 export default function About() {
   const ref = useRef(null)
+  const sideRef = useRef(null)
+  useFitToSide(ref, sideRef)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start 0.85', 'end 0.55'] })
   const words = about.split(' ')
   return (
@@ -104,9 +172,11 @@ export default function About() {
               </Word>
             ))}
           </p>
-          <FadeUp className="about-side" delay={0.1}>
-            <Portrait />
-            <ResumeCta />
+          <FadeUp className="about-side-wrap" delay={0.1}>
+            <div className="about-side" ref={sideRef}>
+              <Portrait />
+              <ResumeCta />
+            </div>
           </FadeUp>
         </div>
         <div className="stats">

@@ -43,6 +43,12 @@ export const profile = {
   portrait,
 }
 
+// Résumé card under the About photo. Taken from the CV PDF (public/AhamedAsri_Resume.pdf).
+export const resumeBrief = {
+  role: 'Aspiring Information Security Engineer',
+  year: '2026',
+}
+
 export const about =
   "Computer Science undergraduate at the University of Westminster, studying at IIT Colombo. My interests span cybersecurity, software development and networking, especially how automation and AI can support security operations. Currently building hands-on experience with security tools, threat analysis and network defense, with the goal of making security work faster and systems more resilient."
 
