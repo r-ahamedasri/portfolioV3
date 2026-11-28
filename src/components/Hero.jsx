@@ -224,7 +224,10 @@ export default function Hero({ ready }) {
             <em>Security engineering</em>
             <br />with AI at its core
           </motion.p>
-          <motion.p className="hero-tag" {...fade(1)}>{profile.tagline}</motion.p>
+          <motion.div className="hero-tag" {...fade(1)}>
+            <p>{profile.tagline}</p>
+            <p className="hero-seeking"><i className="pulse" /> {profile.seeking}</p>
+          </motion.div>
           <motion.div {...fade(1.1)} className="hero-badge">
             <ScrollBadge />
           </motion.div>

@@ -8,8 +8,8 @@ import ThemeToggle from './ThemeToggle.jsx'
 
 const links = [
   ['about', 'About'],
-  ['skills', 'Skills'],
   ['work', 'Work'],
+  ['skills', 'Skills'],
   ['journey', 'Journey'],
   ['certifications', 'Certs'],
   ['contact', 'Contact'],

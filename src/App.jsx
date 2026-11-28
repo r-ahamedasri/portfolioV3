@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import Lenis from 'lenis'
 import { Analytics } from '@vercel/analytics/react'
@@ -17,7 +17,15 @@ import Contact from './components/Contact.jsx'
 
 export default function App() {
   const reduced = useReducedMotion()
-  const [loading, setLoading] = useState(!reduced)
+  // The intro plays once per visit (browser tab session), not on every reload.
+  const [loading, setLoading] = useState(() => {
+    if (reduced) return false
+    try { return sessionStorage.getItem('introSeen') !== '1' } catch { return true }
+  })
+  const finishIntro = useCallback(() => {
+    try { sessionStorage.setItem('introSeen', '1') } catch {}
+    setLoading(false)
+  }, [])
 
   useEffect(() => {
     if (reduced) return
@@ -56,14 +64,14 @@ export default function App() {
     <>
       <div className="grain" aria-hidden="true" />
       <Cursor />
-      <AnimatePresence mode="wait">{loading && <Preloader key="pre" onDone={() => setLoading(false)} />}</AnimatePresence>
+      <AnimatePresence mode="wait">{loading && <Preloader key="pre" onDone={finishIntro} />}</AnimatePresence>
       <Nav ready={!loading} />
       <main>
         <Hero ready={!loading} />
         <Marquee />
         <About />
-        <Skills />
         <Projects />
+        <Skills />
         <Journey />
         <Certifications />
         <Contact />

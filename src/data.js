@@ -35,6 +35,8 @@ export const profile = {
   city: 'Colombo, Sri Lanka',
   timeZone: 'Asia/Colombo',
   available: 'Open to internships & collaborations',
+  seeking: 'CS undergraduate · looking for a cybersecurity internship',
+  whatsapp: 'https://wa.me/94740101153',
   email: 'r.ahamedasri@gmail.com',
   github: 'https://github.com/r-ahamedasri',
   linkedin: 'https://www.linkedin.com/in/ahamedasri',
@@ -93,7 +95,7 @@ export const skills = [
     key: 'cloud',
     title: 'Systems & Cloud',
     blurb: 'Where the code actually runs, locked down.',
-    items: ['Linux', 'Bash', 'Docker', 'AWS', 'Cloud IAM'],
+    items: ['Linux', 'Bash', 'Docker'],
   },
   {
     key: 'build',
@@ -112,6 +114,8 @@ export const projects = [
     description:
       'A digital product passport powered by a pipeline of cooperating AI agents. Give it a barcode, QR code or product name and it reports materials, supply chain, carbon footprint and how to repair or recycle it.',
     stack: ['Python', 'Google ADK', 'Gemini', 'AI Agents', 'Pytest'],
+    built: 'A chain of Google ADK agents, each handling one step, from identifying the product to writing the final passport, with Pytest tests around it.',
+    learned: 'How to split a job across agents, pass results between them, and test AI output that changes from run to run.',
     links: { code: 'https://github.com/r-ahamedasri/originai' },
     image: originCover,
   },
@@ -122,6 +126,8 @@ export const projects = [
     description:
       'A Python CLI that fingerprints unknown hashes by length, prefix and pattern, ranks the likely algorithms by confidence and flags strings that are not hashes at all. Built to speed up early forensic and password-audit work.',
     stack: ['Python', 'CLI', 'Hash Analysis'],
+    built: 'The matching rules (length, prefix, character set), the confidence ranking, and a check that flags input that is not a hash.',
+    learned: 'How common hash formats differ, and why length alone is not enough: MD5 and NTLM are both 32 hex characters.',
     links: { code: 'https://github.com/r-ahamedasri/hash-identifier' },
     image: hashCover,
   },
@@ -132,6 +138,8 @@ export const projects = [
     description:
       'A local-first password and recovery-key vault written in Rust. Everything is encrypted on your own machine, nothing touches a server, and a backup recovery phrase means you never lock yourself out.',
     stack: ['Rust', 'Cryptography', 'Encryption', 'CLI'],
+    built: 'The vault itself: Argon2id key derivation, XChaCha20-Poly1305 encryption and a 24-word recovery phrase that can unlock it if the master password is lost.',
+    learned: 'How key derivation and key wrapping work, and why keys should live only in memory and be wiped after use.',
     links: { code: 'https://github.com/r-ahamedasri/ShulkerBox' },
     image: shulkerCover,
   },

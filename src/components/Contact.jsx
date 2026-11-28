@@ -52,15 +52,16 @@ export default function Contact() {
         <FadeUp className="contact-row">
           <div className="contact-cell">
             <span className="eyebrow">Email</span>
-            <span id="contact-email" className="contact-email">{profile.email}</span>
+            <a id="contact-email" className="contact-email" href={`mailto:${profile.email}`} data-cursor="Email">{profile.email}</a>
           </div>
           <div className="contact-cell">
             <span className="eyebrow">Elsewhere</span>
             <div className="socials">
               <RollLink href={profile.github} target="_blank" rel="noreferrer">GitHub ↗</RollLink>
               <RollLink href={profile.linkedin} target="_blank" rel="noreferrer">LinkedIn ↗</RollLink>
+              <RollLink href={profile.whatsapp} target="_blank" rel="noreferrer">WhatsApp ↗</RollLink>
               <RollLink href={profile.tryhackme} target="_blank" rel="noreferrer">TryHackMe ↗</RollLink>
-              <RollLink href={profile.resume} target="_blank" rel="noreferrer">Resume ↗</RollLink>
+              <RollLink href={profile.resume} target="_blank" rel="noreferrer">Résumé ↗</RollLink>
             </div>
           </div>
           <div className="contact-cell">

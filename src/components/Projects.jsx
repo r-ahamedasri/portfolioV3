@@ -29,6 +29,12 @@ function ProjectCard({ p, i, n, progress, reduced }) {
           </div>
           <h3>{p.title}</h3>
           <p className="muted">{p.description}</p>
+          {(p.built || p.learned) && (
+            <dl className="pcard-notes">
+              {p.built && <div><dt>What I built</dt><dd>{p.built}</dd></div>}
+              {p.learned && <div><dt>What I learned</dt><dd>{p.learned}</dd></div>}
+            </dl>
+          )}
           <div className="proj-foot">
             <ul className="pills small">
               {p.stack.map((s) => <li key={s}>{s}</li>)}

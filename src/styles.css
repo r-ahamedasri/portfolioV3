@@ -259,6 +259,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .hero-role { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(1.4rem, 2.4vw, 2.1rem); line-height: 1.1; letter-spacing: -0.02em; }
 .hero-role em { color: var(--ember); }
 .hero-tag { margin: 0; color: rgba(var(--fg), .72); max-width: 44ch; font-size: clamp(15px, 1.2vw, 18px); }
+.hero-tag p { margin: 0; }
+.hero-seeking { margin-top: 12px !important; display: flex; align-items: center; gap: 10px; font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: rgba(var(--fg), .9); }
+.hero-seeking .pulse { flex: none; }
 .scroll-badge { position: relative; width: 116px; height: 116px; border-radius: 50%; display: grid; place-items: center; background: rgba(var(--bg),.35); backdrop-filter: blur(8px); border: 1px solid var(--line-2); }
 .scroll-badge .spin { position: absolute; inset: 0; width: 100%; height: 100%; animation: spin 14s linear infinite; }
 .scroll-badge text { font-family: var(--mono); font-size: 9.6px; letter-spacing: 0.22em; fill: var(--paper); }
@@ -606,6 +609,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pcard-art img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1.2s cubic-bezier(.16,1,.3,1); }
 .pcard:hover .pcard-art img { transform: scale(1.05); }
 .pcard-num { position: absolute; left: 16px; top: 14px; padding: 4px 10px; border-radius: 999px; font-family: var(--mono); font-size: 12px; color: #fff; background: rgba(8,9,13,.5); backdrop-filter: blur(6px); }
+.pcard-notes { margin: 0; display: grid; gap: 10px; font-size: 14px; line-height: 1.5; }
+.pcard-notes dt { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ember); margin-bottom: 2px; }
+.pcard-notes dd { margin: 0; color: rgba(var(--fg), .72); }
 .pcard-info { position: relative; display: grid; gap: 14px; align-content: center; min-width: 0; padding-block: 12px; }
 .pcard-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .pcard h3 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(2.2rem, 4vw, 3.6rem); letter-spacing: -0.04em; line-height: 1; }
@@ -872,6 +878,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .big-btn-label { position: relative; color: #fff; }
 .contact-row { display: grid; grid-template-columns: 1.3fr 1.3fr 1fr; gap: 32px; padding-block: 40px; }
 .contact-cell { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.contact-email { color: inherit; text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .4s; }
+.contact-email:hover, .contact-email:focus-visible { background-size: 100% 1px; }
 .contact-email { font-family: var(--display); font-size: clamp(1.3rem, 2.2vw, 1.9rem); font-weight: 500; letter-spacing: -0.02em; overflow-wrap: anywhere; user-select: all; }
 .socials { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 17px; }
 .footer-big { overflow: hidden; line-height: 0.75; text-align: center; pointer-events: none; }
