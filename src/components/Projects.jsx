@@ -94,7 +94,7 @@ export default function Projects() {
       <div className="container">
         <Eyebrow index="Security × AI">Selected work</Eyebrow>
         <div className={`work-head${pin ? ' is-pinned' : ''}`} ref={head}>
-          <RevealLines className="h-xl" lines={[<>Things I've <em>built</em></>]} />
+          <RevealLines className="h-xl" lines={[<>Ideas I’ve turned</>, <>into <em>action</em></>]} />
         </div>
         <ol className="stk" ref={ref}>
           {projects.map((p, i) => (

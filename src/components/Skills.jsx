@@ -87,7 +87,7 @@ export default function Skills() {
     <section className="section skills" id="skills">
       <div className="container">
         <Eyebrow index="What I work with">Skills</Eyebrow>
-        <RevealLines className="h-xl" lines={[<>Built to break,</>, <>trained to <em>defend.</em></>]} />
+        <RevealLines className="h-xl" lines={[<>Skills I’m putting</>, <>to <em>work</em></>]} />
 
         <motion.div
           className="skt"

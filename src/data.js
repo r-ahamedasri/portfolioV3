@@ -247,9 +247,18 @@ export const badges = [
 // Completed TryHackMe rooms: update this as the count grows.
 const thmRoomsCompleted = 7
 
+// Tools & technologies stat: every item in the Skills section that is a named tool, language or platform.
+// Concepts and practices (listed here) are left out so the number only counts real tools.
+const notTools = new Set([
+  'OWASP Top 10', 'Privilege Escalation', 'TryHackMe CTFs', 'Embeddings',
+  'Anomaly Detection', 'Phishing Detection', 'Log Analysis', 'Threat Detection',
+  'TCP/IP', 'Firewalls & IDS', 'VPNs', 'SIEM', 'Cloud IAM',
+])
+const toolCount = new Set(skills.flatMap((g) => g.items).filter((i) => !notTools.has(i))).size
+
 export const stats = [
-  { value: projects.length, label: 'Projects' },
+  { value: projects.length, label: 'Projects shipped' },
+  { value: toolCount, label: 'Tools & technologies used' },
   { value: thmRoomsCompleted, label: 'TryHackMe rooms completed' },
-  { value: certificates.length + badges.length, label: 'Certifications & badges' },
-  { value: 2028, label: 'Expected graduation' },
+  { value: certificates.length + badges.length, label: 'Certifications & badges earned' },
 ]
