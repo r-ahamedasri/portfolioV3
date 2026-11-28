@@ -1,22 +1,50 @@
-import { useEffect, useState } from 'react'
+import { Component, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { ease } from '../lib.js'
 
-const words = ['Hello', 'Bonjour', 'Hola', 'Ciao', 'வணக்கம்', 'こんにちは', 'Hello']
+// Greetings cycled by the preloader, in a mixed order.
+const words = [
+  { t: 'Hello' },
+  { t: 'Bonjour', lang: 'fr' },
+  { t: 'ආයුබෝවන්', lang: 'si' },
+  { t: 'Hola', lang: 'es' },
+  { t: 'السلام عليكم', lang: 'ar', dir: 'rtl' },
+  { t: 'こんにちは', lang: 'ja' },
+  { t: 'வணக்கம்', lang: 'ta' },
+  { t: 'Hello' },
+]
 
-export default function Preloader({ onDone }) {
+// If anything inside the intro fails (for example a browser extension or auto-translate rewriting the
+// greeting text), skip the intro instead of taking the whole page down.
+class SkipOnError extends Component {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() { this.props.onDone?.() }
+  render() { return this.state.failed ? null : this.props.children }
+}
+
+export default function Preloader(props) {
+  return (
+    <SkipOnError onDone={props.onDone}>
+      <PreloaderInner {...props} />
+    </SkipOnError>
+  )
+}
+
+function PreloaderInner({ onDone }) {
   const [n, setN] = useState(0)
   const [w, setW] = useState(0)
+  const cur = words[w] ?? words[0]
 
   useEffect(() => {
     const start = performance.now()
-    const dur = 2000
+    const dur = 2400
     let id
     const tick = (t) => {
-      const p = Math.min(1, (t - start) / dur)
+      const p = Math.max(0, Math.min(1, (t - start) / dur))
       const eased = 1 - Math.pow(1 - p, 3)
       setN(Math.round(eased * 100))
-      setW(Math.min(words.length - 1, Math.floor(p * words.length)))
+      setW(Math.max(0, Math.min(words.length - 1, Math.floor(p * words.length))))
       if (p < 1) id = requestAnimationFrame(tick)
       else setTimeout(onDone, 250)
     }
@@ -26,7 +54,8 @@ export default function Preloader({ onDone }) {
 
   return (
     <motion.div
-      className="preloader"
+      className="preloader notranslate"
+      translate="no"
       initial={{ y: 0 }}
       exit={{ y: '-100%', borderBottomLeftRadius: '50% 12vh', borderBottomRightRadius: '50% 12vh' }}
       transition={{ duration: 1.1, ease }}
@@ -37,8 +66,8 @@ export default function Preloader({ onDone }) {
       </div>
       <div className="pre-word" aria-live="polite">
         <span className="pre-dot" />
-        <motion.span key={w} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
-          {words[w]}
+        <motion.span key={w} lang={cur.lang} dir={cur.dir} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+          {cur.t}
         </motion.span>
       </div>
       <div className="pre-bottom">

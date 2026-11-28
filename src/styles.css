@@ -68,7 +68,7 @@
 .theme-toggle svg { width: 20px; height: 20px; overflow: visible; }
 
 * { box-sizing: border-box; }
-html { background: var(--ink); }
+html { background: var(--ink); position: relative; /* scroll effects measure from the page; avoids a framer-motion warning */ }
 html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 .lenis.lenis-stopped { overflow: hidden; }
@@ -146,6 +146,9 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spa
 }
 .pre-top { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .pre-word { display: flex; align-items: center; justify-content: center; gap: 16px; font-family: var(--display); font-weight: 600; font-size: clamp(2.4rem, 6vw, 4.5rem); letter-spacing: -0.03em; }
+.pre-word [lang='si'] { font-family: 'Noto Sans Sinhala', 'Iskoola Pota', 'Nirmala UI', var(--display); letter-spacing: 0; }
+.pre-word [lang='ar'] { font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', var(--display); letter-spacing: 0; }
+.pre-word [lang='ta'], .pre-word [lang='ja'] { letter-spacing: 0; }
 .pre-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 24px var(--ember); }
 .pre-bottom { display: flex; align-items: flex-end; gap: 24px; }
 .pre-bar { flex: 1; height: 1px; background: var(--line-2); margin-bottom: 1.2em; }

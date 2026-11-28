@@ -40,6 +40,16 @@ export default function App() {
     if (loading) window.__lenis?.stop()
     else window.__lenis?.start()
     document.documentElement.classList.toggle('is-loading', loading)
+    // Opening a link like /#certifications: the page is locked while the intro plays, so the browser's
+    // own jump to that section is lost. Go there once the intro is done.
+    if (loading) return
+    const target = window.location.hash && document.getElementById(decodeURIComponent(window.location.hash.slice(1)))
+    if (!target) return
+    const id = requestAnimationFrame(() => {
+      if (window.__lenis) window.__lenis.scrollTo(target, { immediate: true, force: true })
+      else target.scrollIntoView()
+    })
+    return () => cancelAnimationFrame(id)
   }, [loading])
 
   return (
