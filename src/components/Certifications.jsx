@@ -346,7 +346,7 @@ export default function Certifications() {
       <div className="container">
         <Eyebrow index="Verified">Certifications</Eyebrow>
         <div className="certs-head">
-          <RevealLines className="h-xl" lines={[<>Credentials <em>that</em></>, <><em>track my progress</em></>]} />
+          <RevealLines className="h-xl" lines={[<><span className="h-lead">Credentials</span> <em>that</em></>, <><em>track my progress</em></>]} />
           <FadeUp delay={0.1} className="certs-stats">
             <div><b><Count to={badges.length} /></b><span>Badges</span></div>
             <div><b><Count to={certificates.length} /></b><span>Certificates</span></div>

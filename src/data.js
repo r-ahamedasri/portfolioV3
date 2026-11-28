@@ -53,8 +53,9 @@ export const about =
   "Computer Science undergraduate at the University of Westminster, studying at IIT Colombo. My interests span cybersecurity, software development and networking, especially how automation and AI can support security operations. Currently building hands-on experience with security tools, threat analysis and network defense, with the goal of making security work faster and systems more resilient."
 
 
-export const marqueeA = ['Python', 'Rust', 'PyTorch', 'Burp Suite', 'Wireshark', 'Nmap', 'Google ADK', 'Gemini', 'Linux', 'Metasploit']
-export const marqueeB = ['Threat Detection', 'Multi-Agent AI', 'Ethical Hacking', 'LLM Security', 'Network Defense', 'Applied Cryptography', 'Anomaly Detection', 'OWASP Top 10']
+// Two sides of the work: top row (solid) = AI & software development, bottom row (outline) = cybersecurity.
+export const marqueeA = ['Python', 'Rust', 'PyTorch', 'TensorFlow', 'Google ADK', 'Gemini', 'Multi-Agent AI', 'Hugging Face', 'FastAPI', 'React']
+export const marqueeB = ['Nmap', 'Metasploit', 'Burp Suite', 'Wireshark', 'OWASP Top 10', 'Threat Detection', 'Ethical Hacking', 'LLM Security', 'Network Defense', 'Applied Cryptography', 'Anomaly Detection', 'Linux']
 
 export const skills = [
   {

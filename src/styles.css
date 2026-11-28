@@ -123,7 +123,9 @@ em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spa
   margin: 0 0 clamp(40px, 6vw, 80px);
   text-wrap: balance;
 }
-.h-xl em, .h-giant em { color: var(--ember); }
+/* Section headings: first word in the accent colour, the italic rest in the main text colour. */
+.h-xl em, .h-giant em { color: inherit; }
+.h-xl .h-lead, .h-giant .h-lead { color: var(--ember); }
 
 /* grain */
 .grain {

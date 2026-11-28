@@ -38,7 +38,7 @@ export default function Contact() {
     <section className="section contact" id="contact" ref={ref}>
       <div className="container">
         <div className="contact-top">
-          <RevealLines as="h2" className="h-giant" lines={[<>Ready <em>when</em></>, <><em>you are.</em></>]} />
+          <RevealLines as="h2" className="h-giant" lines={[<><span className="h-lead">Ready</span> <em>when</em></>, <><em>you are.</em></>]} />
           <FadeUp className="contact-cta" delay={0.2}>
             <Magnetic strength={0.45}>
               <button id="copy-email" type="button" className="big-btn" onClick={copy} data-cursor={copied ? 'Copied' : 'Copy'}>
