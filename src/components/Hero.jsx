@@ -203,7 +203,7 @@ export default function Hero({ ready }) {
             </span>
             <motion.span className="hero-line hero-line-2" ref={second} style={{ ...lineB, y: yB }}>
               <motion.span className="hl2-side" {...fade(1.3)}>
-                <span className="hl2-k">(Security × AI)</span>
+                <span className="hl2-k">(CS Undergraduate)</span>
                 <i className="hl2-rule" />
               </motion.span>
               <span className="hl2" ref={word}>
@@ -213,21 +213,21 @@ export default function Hero({ ready }) {
               </span>
               <motion.span className="hl2-side hl2-side-r" {...fade(1.4)}>
                 <i className="hl2-rule" />
-                <span>Security engineer<br />&amp; AI builder</span>
+                <span>Available for<br />internships 2027</span>
               </motion.span>
             </motion.span>
           </span>
         </h1>
+
+        {/* Phones hide the side labels beside ASRI, so the internship line shows here instead. */}
+        <motion.p className="hero-seeking-sm" {...fade(1.3)}>{profile.seeking}</motion.p>
 
         <div className="hero-bottom">
           <motion.p className="hero-role" {...fade(0.9)}>
             <em>Security engineering</em>
             <br />with AI at its core
           </motion.p>
-          <motion.div className="hero-tag" {...fade(1)}>
-            <p>{profile.tagline}</p>
-            <p className="hero-seeking"><i className="pulse" /> {profile.seeking}</p>
-          </motion.div>
+          <motion.p className="hero-tag" {...fade(1)}>{profile.tagline}</motion.p>
           <motion.div {...fade(1.1)} className="hero-badge">
             <ScrollBadge />
           </motion.div>

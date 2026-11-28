@@ -31,7 +31,7 @@ export const profile = {
   city: 'Colombo, Sri Lanka',
   timeZone: 'Asia/Colombo',
   available: 'Open to internships & collaborations',
-  seeking: 'CS undergraduate · looking for a cybersecurity internship',
+  seeking: 'CS undergrad · available for internships 2027',
   whatsapp: 'https://wa.me/94740101153',
   email: 'r.ahamedasri@gmail.com',
   github: 'https://github.com/r-ahamedasri',

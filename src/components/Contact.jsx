@@ -6,22 +6,16 @@ import { RevealLines, FadeUp } from './Reveal.jsx'
 import Magnetic from './Magnetic.jsx'
 import { brand } from '../skillIcons.js'
 
-// Contact links shown as icon pills: [label, link, icon]. Brand marks from Simple Icons; the résumé gets a plain document icon.
+// Contact links shown as icon pills: [label, link, icon]. Brand marks from Simple Icons.
 const socials = [
   ['GitHub', profile.github, 'github'],
   ['LinkedIn', profile.linkedin, 'linkedin'],
   ['WhatsApp', profile.whatsapp, 'whatsapp'],
   ['TryHackMe', profile.tryhackme, 'tryhackme'],
-  ['Résumé', profile.resume, 'doc'],
 ]
 
 function SocIcon({ name }) {
-  if (brand[name]) return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={brand[name].d} fill="currentColor" /></svg>
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h6" />
-    </svg>
-  )
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d={brand[name].d} fill="currentColor" /></svg>
 }
 
 export default function Contact() {
@@ -59,9 +53,17 @@ export default function Contact() {
           <RevealLines as="h2" className="h-giant" lines={[<><span className="h-lead">Ready</span> <em>when</em></>, <><em>you are.</em></>]} />
           <FadeUp className="contact-cta" delay={0.2}>
             <Magnetic strength={0.45}>
-              <button id="copy-email" type="button" className="big-btn" onClick={copy} data-cursor={copied ? 'Copied' : 'Copy'}>
+              <button id="copy-email" type="button" className="big-btn" onClick={copy} title={`Copy ${profile.email}`} aria-label={`Copy my email address, ${profile.email}`}>
                 <span className="big-btn-fill" />
-                <span className="big-btn-label">{copied ? 'Copied!' : 'Get in touch'}</span>
+                {/* Reads "Get in touch"; on hover it says what a click does, and confirms once copied. */}
+                <span className="big-btn-label" aria-live="polite">
+                  {copied ? 'Email copied ✓' : (
+                    <>
+                      <span className="big-btn-rest">Get in touch</span>
+                      <span className="big-btn-hover" aria-hidden="true">Copy email</span>
+                    </>
+                  )}
+                </span>
               </button>
             </Magnetic>
           </FadeUp>
