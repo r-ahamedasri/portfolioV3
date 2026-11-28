@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform, useInView, animate, useMotionValue, useSpring } from 'framer-motion'
 import { about, stats, profile } from '../data.js'
 import { Eyebrow, FadeUp } from './Reveal.jsx'
+import Magnetic from './Magnetic.jsx'
+import RollLink from './RollLink.jsx'
 
 function Word({ children, range, progress }) {
   const opacity = useTransform(progress, range, [0.14, 1])
@@ -26,6 +28,30 @@ function Counter({ value, decimals = 0, suffix }) {
       {value == null ? '—' : v.toFixed(decimals)}
       {suffix}
     </span>
+  )
+}
+
+// Résumé download under the portrait: a wide pill with an ember wipe, plus a quiet GitHub link.
+function ResumeCta() {
+  return (
+    <div className="resume-cta">
+      <Magnetic strength={0.18} className="resume-mag">
+        <a id="about-resume" className="resume-btn" href={profile.resume} download data-cursor="PDF">
+          <span className="resume-btn-fill" />
+          <span className="resume-btn-text">
+            <span className="resume-btn-label">Download résumé</span>
+            <span className="resume-btn-meta">PDF · 1 page</span>
+          </span>
+          <span className="resume-btn-icon" aria-hidden="true">
+            <span>↓</span>
+            <span>↓</span>
+          </span>
+        </a>
+      </Magnetic>
+      <div className="resume-sub">
+        <RollLink href={profile.github} target="_blank" rel="noreferrer">View on GitHub ↗</RollLink>
+      </div>
+    </div>
   )
 }
 
@@ -80,6 +106,7 @@ export default function About() {
           </p>
           <FadeUp className="about-side" delay={0.1}>
             <Portrait />
+            <ResumeCta />
           </FadeUp>
         </div>
         <div className="stats">
