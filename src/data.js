@@ -7,10 +7,6 @@ import originCover from './assets/projects/originai.webp'
 import shulkerCover from './assets/projects/shulkerbox.webp'
 import portrait from './assets/portrait.webp'
 
-import cert01 from './assets/certs/certificate-01.webp'
-import cert02 from './assets/certs/certificate-02.webp'
-import cert03 from './assets/certs/certificate-03.webp'
-import cert04 from './assets/certs/certificate-04.webp'
 import cert05 from './assets/certs/certificate-05.webp'
 import cert06 from './assets/certs/certificate-06.webp'
 
@@ -28,7 +24,7 @@ export const profile = {
   short: 'Asri',
   role: 'AI & Cybersecurity',
   tagline:
-    'I study how systems fail, building tools to automate security work and make systems more resilient.',
+    'I study how systems fail and build tools that automate security work and make systems more resilient.',
   university: 'University of Westminster · IIT Colombo',
   degree: 'BSc (Hons) Computer Science',
   gradYear: '2028',
@@ -52,7 +48,7 @@ export const resumeBrief = {
 }
 
 export const about =
-  "Computer Science undergraduate at the University of Westminster, studying at IIT Colombo. My interests span cybersecurity, software development and networking, especially how automation and AI can support security operations. Currently building hands-on experience with security tools, threat analysis and network defense, with the goal of making security work faster and systems more resilient."
+  "Computer Science undergraduate at the University of Westminster, studying at IIT Colombo. My interests span cybersecurity, software development and networking, especially how automation and AI can support security operations. I'm currently building hands-on experience with security tools, threat analysis and network defense, with the goal of making security work faster and systems more resilient."
 
 
 // Two sides of the work: top row (solid) = AI & software development, bottom row (outline) = cybersecurity.
@@ -147,18 +143,11 @@ export const projects = [
 
 export const journey = [
   {
-    when: '2023 — 2024',
+    when: '2023 — 2025',
     tag: 'School',
-    title: 'G.C.E. Advanced Level',
-    org: 'Zahira College, Kalmunai',
-    detail: 'Physical Science stream, where the interest in how systems work began.',
-  },
-  {
-    when: 'Feb — Jun 2025',
-    tag: 'Certificate',
-    title: 'Information Technology & English',
-    org: 'BCAS Campus',
-    detail: 'Built a grounding in computing fundamentals and technical communication.',
+    title: 'Before university',
+    org: 'A/L Physical Science, Zahira College · IT & English certificate, BCAS',
+    detail: 'Where the interest in how systems work began, and the first grounding in computing.',
   },
   {
     when: 'May — Dec 2025',
@@ -211,32 +200,6 @@ export const certificates = [
     date: 'Jul 2026',
     image: cert06,
     link: 'https://www.linkedin.com/learning/certificates/d077807610bb8275c9a6711b5983109e6933a465a9b3efdc85011c283ac2e7c0',
-  },
-  {
-    title: 'English Communication Skills for IT',
-    issuer: 'Informatics Institute of Technology',
-    date: 'Jul 2026',
-    image: cert04,
-  },
-  {
-    title: 'Foundation Certificate in Higher Education',
-    issuer: 'Informatics Institute of Technology',
-    date: 'Jan 2026',
-    image: cert03,
-  },
-  {
-    title: 'Information Technology',
-    issuer: 'BCAS Campus',
-    date: 'Sep 2025',
-    image: cert01,
-    link: 'http://www.bcas.lk/bcvs/',
-  },
-  {
-    title: 'English',
-    issuer: 'BCAS Campus',
-    date: 'Sep 2025',
-    image: cert02,
-    link: 'http://www.bcas.lk/bcvs/',
   },
 ]
 
